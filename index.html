@@ -1,0 +1,1330 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<title>Effective Unit Testing for SQL Server</title>
+
+	<link rel="stylesheet" href="css/reveal.css">
+	<link rel="stylesheet" href="css/theme/sky.css">
+	<link rel="stylesheet" href="css/gc.css" />
+
+	<!-- Theme used for syntax highlighting of code -->
+	<link rel="stylesheet" href="lib/css/vs.css">
+
+	<!-- Printing and PDF exports -->
+	<script>
+		var link = document.createElement('link');
+		link.rel = 'stylesheet';
+		link.type = 'text/css';
+		link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+		document.getElementsByTagName('head')[0].appendChild(link);
+	</script>
+</head>
+
+<body>
+	<div class="reveal">
+		<div class="slides">
+			<section>
+				<h1>Effective Unit Testing for SQL Server</h1>
+				<hr/>
+				<h3>Gavin Campbell</h3>
+				<h3>arapaima.uk</h3>
+			</section>
+			<section>
+				<h2>Stay in touch</h2>
+				<iframe class="stretch" data-src=http://arapaima.uk/fixed/about/></iframe>
+			</section>
+			<section>
+				<h1>What's so great about Unit Testing anyway?</h1>
+			</section>
+			<section>
+				<h2>What is Unit Testing?</h2>
+				<h2 class="fragment">What is a "Unit"?</h2>
+				<span class="fragment">
+					<blockquote>The primary goal of unit testing is to take the smallest piece of testable software in the application, isolate it from
+						the remainder of the code, and determine whether it behaves exactly as you expect.</blockquote>
+
+					<cite>
+						<a href="https://www.microsoft.com/en-us/download/details.aspx?id=55979">MSDN, Visual Studio 2003 Documentation</a>
+					</cite>
+
+
+				</span>
+
+			</section>
+
+			<section>
+				<h2>What code should we test?</h2>
+				<blockquote class="fragment" data-fragment-index="1">
+					It's called unit testing because you break down the functionality of your program into discrete testable
+					<span class="fragment highlight-current-blue" data-fragment-index="3">behaviors</span> that you can test as individual
+					<span class="fragment highlight-current-blue" data-fragment-index="2">units</span>. </blockquote>
+				<cite>
+					<a href="https://docs.microsoft.com/en-us/visualstudio/test/unit-test-basics">MSDN, "Unit Test Basics"</a>
+				</cite>
+				<pre class="fragment" data-fragment-index="4"><code class="tsql">SELECT * FROM sys.sql_modules;</code></pre>
+				<table class="fragment" data-fragment-index="5">
+					<thead>
+						<tr>
+							<th>object_id</th>
+							<th>definition</th>
+							<th>...</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>1758629308</td>
+							<td> CREATE PROCEDURE Integration.GetCityUpdates @La</td>
+							<td>...</td>
+						</tr>
+						<tr>
+							<td>1051150790</td>
+							<td> CREATE FUNCTION [Application].DetermineCustomerA</td>
+							<td>...</td>
+						</tr>
+						<tr>
+							<td>1790629422</td>
+							<td> CREATE PROCEDURE Integration.GetEmployeeUpdates </td>
+							<td>...</td>
+						</tr>
+						<tr>
+							<td>1294627655</td>
+							<td> CREATE PROCEDURE DataLoadSimulation.Configuratio</td>
+							<td>...</td>
+						</tr>
+						<tr>
+							<td>974626515 </td>
+							<td> CREATE PROCEDURE Website.SearchForStockItemsByTa</td>
+							<td>...</td>
+						</tr>
+						<tr>
+							<td>1694629080</td>
+							<td> CREATE VIEW Website.Customers AS SELECT s.Cust</td>
+							<td>...</td>
+						</tr>
+						<tr>
+							<td>...</td>
+							<td>...</td>
+							<td>...</td>
+						</tr>
+					</tbody>
+				</table>
+			</section>
+
+
+			<section>
+				<h2>What makes a "good" Unit Test</h2>
+				<ul>
+					<li>Fast</li>
+					<li>Independent</li>
+					<li>Reliable</li>
+					<li>Specific</li>
+				</ul>
+			</section>
+
+			<section>
+				<h2>The Test Pyramid</h2>
+				<img class="stretch plain" src="images/TestPyramid1.png" />
+			</section>
+			<section>
+				<h2>The Test Pyramid</h2>
+				<img class="stretch plain" src="images/TestPyramid2.png" />
+			</section>
+			<section>
+				<h2>The Test Pyramid</h2>
+				<img class="stretch plain" src="images/TestPyramid3.png" />
+			</section>
+
+			<section>
+				<h2>The Test Pyramid</h2>
+				<img class="stretch plain" src="images/CircsOfConcern1.png" />
+				<cite>
+					<a href="https://www.stephencovey.com/7habits/7habits.php">Stephen R Covey, The 7 Habits of Highly Effective People</a>
+				</cite>
+			</section>
+			<section>
+				<h2>The Test Pyramid</h2>
+				<img class="stretch plain" src="images/CircsOfConcern2.png" />
+				<cite>
+					<a href="https://www.stephencovey.com/7habits/7habits.php">Stephen R Covey, The 7 Habits of Highly Effective People</a>
+				</cite>
+			</section>
+			<section>
+				<h2>The Test Pyramid</h2>
+				<img class="stretch plain" src="images/CircsOfConcern3.png" />
+				<cite>
+					<a href="https://www.stephencovey.com/7habits/7habits.php">Stephen R Covey, The 7 Habits of Highly Effective People</a>
+				</cite>
+			</section>
+			<section>
+				<h2>The Test Pyramid</h2>
+
+				<img width=40% class="plain" src="images/TestPyramid3.png" />
+				<img width=40% class="plain" src="images/CircsOfConcern3.png" />
+				<cite>
+					<a href="https://www.stephencovey.com/7habits/7habits.php">Stephen R Covey, The 7 Habits of Highly Effective People</a>
+				</cite>
+
+
+			</section>
+			<section>
+				<h2>A simple test</h2>
+			</section>
+			<section>
+				<h3>The code under test</h3>
+				<pre><code  class="tsql" data-trim>
+CREATE PROCEDURE AddTrackToAlbum 
+@TrackId int, @AlbumId int
+AS
+BEGIN
+    UPDATE dbo.Track 
+    SET AlbumId = @AlbumId 
+    WHERE TrackId = @TrackId
+END
+
+                    </code></pre>
+				<aside class=notes>How do we go about testing this?</aside>
+			</section>
+
+
+
+			<section>
+				<h3>A "test script"</h3>
+				<pre><code class="tsql" data-trim> 
+INSERT INTO dbo.Artist(ArtistId,Name) 
+    VALUES (276, 'Showaddywaddy');
+
+INSERT INTO dbo.Album (AlbumId, Title, ArtistId) 
+    VALUES(348, 'Trocadero', 276);
+
+INSERT INTO dbo.Track(TrackId, Name, AlbumId, MediaTypeId, 
+    Milliseconds, UnitPrice)
+    VALUES (3504, 'Under The Moon of Love', 348, 
+    2, 180000, 999.99);
+
+EXEC dbo.AddTrackToAlbum @TrackID = 3504, @AlbumId = 348;
+
+SELECT * FROM Album WHERE AlbumId = 348;
+</code></pre>
+				<table class="fragment">
+					<thead>
+						<tr>
+							<th>AlbumId</th>
+							<th>Title</th>
+							<th>ArtistId</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>348</td>
+							<td>Trocadero</td>
+							<td>276</td>
+						</tr>
+					</tbody>
+				</table>
+				<aside class="notes">Everyone writes these scripts.
+					<i>Talk through steps and Click to run</i>
+					<br/> Even this example has some internal structure.
+				</aside>
+			</section>
+
+
+			<section>
+				<h3>ARRANGE</h3>
+				<pre><code class="tsql" data-trim data-noescape>
+
+<mark>INSERT INTO dbo.Artist(ArtistId,Name) 
+    VALUES (276, 'Showaddywaddy');
+
+INSERT INTO dbo.Album (AlbumId, Title, ArtistId) 
+    VALUES(348, 'Trocadero', 276);
+
+INSERT INTO dbo.Track(TrackId, Name, AlbumId, MediaTypeId, 
+    Milliseconds, UnitPrice)
+    VALUES (3504, 'Under The Moon of Love', 348, 
+    2, 180000, 999.99);
+</mark>
+EXEC dbo.AddTrackToAlbum @TrackID = 3504, @AlbumId = 348;
+
+SELECT * FROM Album WHERE AlbumId = 348;
+</code></pre>
+			</section>
+			<section>
+				<h3>ACT</h3>
+				<pre><code  class="tsql" data-trim data-noescape>
+INSERT INTO dbo.Artist(ArtistId,Name) 
+    VALUES (276, 'Showaddywaddy');
+
+INSERT INTO dbo.Album (AlbumId, Title, ArtistId) 
+    VALUES(348, 'Trocadero', 276);
+
+INSERT INTO dbo.Track(TrackId, Name, AlbumId, MediaTypeId, 
+    Milliseconds, UnitPrice)
+    VALUES (3504, 'Under The Moon of Love', 348, 
+    2, 180000, 999.99);
+<mark>
+EXEC dbo.AddTrackToAlbum @TrackID = 3504, @AlbumId = 348;
+</mark>
+SELECT * FROM Album WHERE AlbumId = 348;
+</code></pre>
+			</section>
+			<section>
+				<h3>"ASSERT"</h3>
+				<pre><code class="tsql"  data-trim data-noescape>
+INSERT INTO dbo.Artist(ArtistId,Name) 
+    VALUES (276, 'Showaddywaddy');
+
+INSERT INTO dbo.Album (AlbumId, Title, ArtistId) 
+    VALUES(348, 'Trocadero', 276);
+
+INSERT INTO dbo.Track(TrackId, Name, AlbumId, MediaTypeId, 
+    Milliseconds, UnitPrice)
+    VALUES (3504, 'Under The Moon of Love', 348, 
+    2, 180000, 999.99);
+
+EXEC dbo.AddTrackToAlbum @TrackID = 3504, @AlbumId = 348;
+<mark>
+SELECT * FROM Album WHERE AlbumId = 348;
+</mark>
+</code></pre>
+			</section>
+			<section>
+				<h3>A Library of Tests</h3>
+				<img class="stretch" src="images/tooManyFiles.png" />
+				<aside class="notes">Could we automated running all these?
+					<br/> Ask the guys in the next session
+					<hr/>But is there a better way?</aside>
+			</section>
+			<section>
+				<h2>Testing Frameworks</h2>
+				<span class="fragment">
+
+					<h5>Tools for Creating Tests</h5>
+					<ul>
+						<li>Attributes</li>
+						<li>Assertions</li>
+					</ul>
+					<hr/>
+					<h5>Tools for Running Tests</h5>
+					<ul>
+						<li>Graphical Test Runners</li>
+						<li>Command Line Test Runners</li>
+					</ul>
+					<hr/>
+					<h5>Tools for Parsing output</h5>
+					<ul>
+						<li>Human Readable</li>
+						<li>Machine Readable</li>
+					</ul>
+				</span>
+			</section>
+
+			<section>
+				<h3>Test Frameworks Family Tree</h3>
+				<img class="plain stretch" src="images/familytree.png" />
+			</section>
+			<section>
+				<h2>tSQLt</h2>
+				<iframe class="stretch" data-src="http://tsqlt.org"></iframe>
+			</section>
+			<section>
+				<h2>tSQLt</h2>
+
+				<h5>Tools for creating tests</h5>
+				<ul>
+					<li>Test Classes</li>
+					<li>Assertions</li>
+					<li>Mocks</li>
+				</ul>
+				<hr/>
+
+				<h5>Tools for running tests</h5>
+				<ul>
+					<li>
+						<code>tSQLt.Run</code>
+					</li>
+					<li>
+						<code>tSQLt.RunTestClass</code>
+					</li>
+
+				</ul>
+				<hr/>
+				<h5>Tools for parsing output</h5>
+				<ul>
+					<li>Text / XML </li>
+
+				</ul>
+			</section>
+
+			<section>
+				<h3>Installation</h3>
+				<pre><code class="tsql stretch" data-trim>
+					/*
+					Copyright 2011 tSQLt
+				 
+					Licensed under the Apache License, Version 2.0 (the "License");
+					you may not use this file except in compliance with the License.
+					You may obtain a copy of the License at
+				 
+						http://www.apache.org/licenses/LICENSE-2.0
+				 
+					Unless required by applicable law or agreed to in writing, software
+					distributed under the License is distributed on an "AS IS" BASIS,
+					WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+					See the License for the specific language governing permissions and
+					limitations under the License.
+				 */
+				 DECLARE @Msg NVARCHAR(MAX);SELECT @Msg = 'Installed at '+CONVERT(NVARCHAR,GETDATE(),121);RAISERROR(@Msg,0,1);
+				 GO
+				 
+				 IF TYPE_ID('tSQLt.Private') IS NOT NULL DROP TYPE tSQLt.Private;
+				 IF TYPE_ID('tSQLtPrivate') IS NOT NULL DROP TYPE tSQLtPrivate;
+				 GO
+				 IF OBJECT_ID('tSQLt.DropClass') IS NOT NULL
+					 EXEC tSQLt.DropClass tSQLt;
+				 GO
+				 
+				 IF EXISTS (SELECT 1 FROM sys.assemblies WHERE name = 'tSQLtCLR')
+					 DROP ASSEMBLY tSQLtCLR;
+				 GO
+				 
+				 CREATE SCHEMA tSQLt;
+				 GO
+				 SET QUOTED_IDENTIFIER ON;
+				 GO
+				 
+				  
+				 ...
+				 ...
+			</code></pre>
+			</section>
+			<section>
+				<h3>tSQLt "Rules"</h3>
+				<ul>
+					<li class="fragment">A test class is a SQL Server schema with some extended properties, created with the
+						<code>tSQLt.NewTestClass</code> stored procedure.</li>
+					<li class="fragment">A test case is a stored procedure that belongs to a schema identified as a test class, the name of which starts with
+						the word "test".</li>
+					<li class="fragment">I can't think of any more rules.</li>
+				</ul>
+			</section>
+			<section>
+				<h4>A tSQLt Test</h4>
+
+				<pre class="stretch"><code class="tsql">EXEC tSQLt.NewTestClass @ClassName = N'AddTrackToAlbum'
+GO
+CREATE PROCEDURE 
+AddTrackToAlbum.[test existing track added to existing album succeeds]
+AS
+BEGIN
+
+EXEC tSQLt.FakeTable 'dbo.Album';
+EXEC tSQLt.FakeTable 'dbo.Track';
+DECLARE @track_id int = 345, @album_id int = 456
+INSERT INTO dbo.Album(AlbumId) VALUES (@album_id);
+INSERT INTO dbo.Track(TrackId) VALUES (@track_id);
+
+EXEC dbo.AddTrackToAlbum @TrackId = @track_id, @AlbumId = @album_id;
+
+SELECT @album_id as AlbumId, @track_id as TrackId into Expected;
+SELECT AlbumId, TrackId INTO Actual FROM Track;
+
+EXEC tSQLt.AssertEqualsTable 
+@Expected = N'Expected', @Actual = N'Actual';
+END
+</code></pre>
+				<aside class="notes">Fakes</br>Expected/Actual</br>asserts</br>
+			</section>
+			<section>
+				<h4>Arrange</h4>
+
+				<pre class="stretch"><code class="tsql" data-noescape>EXEC tSQLt.NewTestClass @ClassName = N'AddTrackToAlbum'
+GO
+CREATE PROCEDURE 
+AddTrackToAlbum.[test existing track added to existing album succeeds]
+AS
+BEGIN
+
+<mark>EXEC tSQLt.FakeTable 'dbo.Album';</mark>
+<mark>EXEC tSQLt.FakeTable 'dbo.Track';</mark>
+<mark>DECLARE @track_id int = 345, @album_id int = 456</mark>
+<mark>INSERT INTO dbo.Album(AlbumId) VALUES (@album_id);</mark>
+<mark>INSERT INTO dbo.Track(TrackId) VALUES (@track_id);</mark>
+
+EXEC dbo.AddTrackToAlbum @TrackId = @track_id, @AlbumId = @album_id;
+
+SELECT @album_id as AlbumId, @track_id as TrackId into Expected;
+SELECT AlbumId, TrackId INTO Actual FROM Track;
+
+EXEC tSQLt.AssertEqualsTable 
+@Expected = N'Expected', @Actual = N'Actual';
+END
+</code></pre>
+
+			</section>
+			<section>
+				<h4>Act</h4>
+
+				<pre class="stretch"><code class="tsql" data-noescape>EXEC tSQLt.NewTestClass @ClassName = N'AddTrackToAlbum'
+GO
+CREATE PROCEDURE 
+AddTrackToAlbum.[test existing track added to existing album succeeds]
+AS
+BEGIN
+
+EXEC tSQLt.FakeTable 'dbo.Album';
+EXEC tSQLt.FakeTable 'dbo.Track';
+DECLARE @track_id int = 345, @album_id int = 456
+INSERT INTO dbo.Album(AlbumId) VALUES (@album_id);
+INSERT INTO dbo.Track(TrackId) VALUES (@track_id);
+
+<mark>EXEC dbo.AddTrackToAlbum @TrackId = @track_id, @AlbumId = @album_id;</mark>
+
+SELECT @album_id as AlbumId, @track_id as TrackId into Expected;
+SELECT AlbumId, TrackId INTO Actual FROM Track;
+
+EXEC tSQLt.AssertEqualsTable 
+@Expected = N'Expected', @Actual = N'Actual';
+END
+</code></pre>
+
+			</section>
+			<section>
+				<h4>Assert</h4>
+
+				<pre class="stretch"><code class="tsql" data-noescape>EXEC tSQLt.NewTestClass @ClassName = N'AddTrackToAlbum'
+GO
+CREATE PROCEDURE 
+AddTrackToAlbum.[test existing track added to existing album succeeds]
+AS
+BEGIN
+
+EXEC tSQLt.FakeTable 'dbo.Album';
+EXEC tSQLt.FakeTable 'dbo.Track';
+DECLARE @track_id int = 345, @album_id int = 456
+INSERT INTO dbo.Album(AlbumId) VALUES (@album_id);
+INSERT INTO dbo.Track(TrackId) VALUES (@track_id);
+
+EXEC dbo.AddTrackToAlbum @TrackId = @track_id, @AlbumId = @album_id;
+
+<mark>SELECT @album_id as AlbumId, @track_id as TrackId into Expected;</mark>
+<mark>SELECT AlbumId, TrackId INTO Actual FROM Track;</mark>
+
+<mark>EXEC tSQLt.AssertEqualsTable</mark> 
+<mark>@Expected = N'Expected', @Actual = N'Actual';</mark>
+END
+</code></pre>
+
+			</section>
+			</section>
+			<section>
+				<pre><code class="tsql">EXEC tSQLt.RunAll;</code></pre>
+				<pre class="stretch"><code class="nohighlight" data-trim >
++----------------------+
+|Test Execution Summary|
++----------------------+
+
+|No|Test Case Name                                                            |Dur(ms)|Result |
++--+--------------------------------------------------------------------------+-------+-------+
+|1 |[AddTrackToAlbum].[test existing track added to existing album succeeds]|     40|Success|
+-----------------------------------------------------------------------------
+Test Case Summary: 1 test case(s) executed, 1 succeeded, 0 failed, 0 errored.
+-----------------------------------------------------------------------------
+</code></pre>
+			</section>
+			<section>
+				<h3>Making the test fail</h3>
+				<pre><code class="tsql">
+ALTER PROCEDURE [dbo].[AddTrackToAlbum] 
+@TrackId int, @AlbumId int
+AS
+
+UPDATE dbo.Track SET AlbumId = NULL WHERE TrackId = @TrackId
+GO
+</code></pre>
+				<pre><code class="tsql">
+EXEC tSQLt.RunAll;
+</code></pre>
+			</section>
+			<section>
+				<pre class="stretch"><code class="nohighlight" data-trim >
+[AddTrackToAlbum].[test existing track added to existing album succeeds] failed: (Failure) Unexpected/missing resultset rows!
+|_m_|AlbumId|TrackId|
++---+-------+-------+
+|<  |456    |345    |
+|>  |!NULL! |345    |
+ 
++----------------------+
+|Test Execution Summary|
++----------------------+
+ 
+|No|Test Case Name                                                            |Dur(ms)|Result |
++--+--------------------------------------------------------------------------+-------+-------+
+|1 |[AddTrackToAlbum].[test existing track added to existing album succeeds]|    360|Failure|
+-----------------------------------------------------------------------------
+Msg 50000, Level 16, State 10, Line 30
+Test Case Summary: 1 test case(s) executed, 0 succeeded, 1 failed, 0 errored.
+-----------------------------------------------------------------------------
+</code></pre>
+
+			</section>
+			<section>
+				<h3>Making the test fail</h3>
+				<pre><code class="tsql" data-trim>
+						CREATE PROCEDURE AddTrackToAlbum 
+						@TrackId int, @AlbumId int
+						AS
+						BEGIN
+							UPDATE dbo.Track 
+							SET AlbumId = @AlbumId 
+							WHERE TrackId = @TrackId
+						END
+					</code></pre>
+
+				<pre><code class="tsql" data-trim>
+
+					CREATE PROCEDURE 
+					AddTrackToAlbum.[test existing track added to existing album succeeds]
+					AS
+					BEGIN
+					
+					EXEC tSQLt.FakeTable 'dbo.Album';
+					EXEC tSQLt.FakeTable 'dbo.Track';
+					DECLARE @track_id int = 345, @album_id int = 456
+					INSERT INTO dbo.Album(AlbumId) VALUES (@album_id);
+					INSERT INTO dbo.Track(TrackId) VALUES (@track_id);
+					
+					EXEC dbo.AddTrackToAlbum @TrackId = @track_id, @AlbumId = @album_id;
+					
+					SELECT @album_id as AlbumId, @track_id as TrackId into Expected;
+					SELECT AlbumId, TrackId INTO Actual FROM Track;
+					
+					EXEC tSQLt.AssertEqualsTable 
+					@Expected = N'Expected', @Actual = N'Actual';
+					END</code></pre>
+			</section>
+			<section>
+				<h3>Making the test fail</h3>
+				<pre><code class="tsql" data-trim data-noescape>
+						CREATE PROCEDURE AddTrackToAlbum 
+						@TrackId int, @AlbumId int
+						AS
+						BEGIN
+							UPDATE dbo.Track 
+							SET AlbumId = <mark>@AlbumId + 1 </mark>
+							WHERE TrackId = @TrackId
+						END
+					</code></pre>
+
+				<pre><code class="tsql" data-trim data-noescape>
+
+					CREATE PROCEDURE 
+					AddTrackToAlbum.[test existing track added to existing album succeeds]
+					AS
+					BEGIN
+					
+					EXEC tSQLt.FakeTable 'dbo.Album';
+					EXEC tSQLt.FakeTable 'dbo.Track';
+					DECLARE @track_id int = 345, @album_id int = 456
+					INSERT INTO dbo.Album(AlbumId) VALUES (@album_id);
+					INSERT INTO dbo.Track(TrackId) VALUES (@track_id);
+					
+					EXEC dbo.AddTrackToAlbum @TrackId = @track_id, @AlbumId = @album_id;
+					
+					SELECT @album_id as AlbumId, @track_id as TrackId into Expected;
+					SELECT AlbumId, TrackId INTO Actual FROM Track;
+					
+					EXEC tSQLt.AssertEqualsTable 
+					@Expected = N'Expected', @Actual = N'Actual';
+					END</code></pre>
+			</section>
+			<section>
+				<h3>Making the test fail</h3>
+				<pre><code class="tsql" data-trim>
+						CREATE PROCEDURE AddTrackToAlbum 
+						@TrackId int, @AlbumId int
+						AS
+						BEGIN
+							UPDATE dbo.Track 
+							SET AlbumId = @AlbumId + 1
+							WHERE TrackId = @TrackId
+						END
+					</code></pre>
+
+				<pre><code class="tsql" data-trim data-noescape>
+
+					CREATE PROCEDURE 
+					AddTrackToAlbum.[test existing track added to existing album succeeds]
+					AS
+					BEGIN
+					
+					EXEC tSQLt.FakeTable 'dbo.Album';
+					EXEC tSQLt.FakeTable 'dbo.Track';
+					DECLARE @track_id int = 345, @album_id int = 456
+					INSERT INTO dbo.Album(AlbumId) VALUES (@album_id);
+					INSERT INTO dbo.Track(TrackId) VALUES (@track_id);
+					
+					EXEC dbo.AddTrackToAlbum @TrackId = @track_id, @AlbumId = @album_id;
+					
+					SELECT @album_id as AlbumId, <mark>NULL</mark> as TrackId into Expected;
+					SELECT AlbumId, TrackId INTO Actual FROM Track;
+					
+					EXEC tSQLt.AssertEqualsTable 
+					@Expected = N'Expected', @Actual = N'Actual';
+					END</code></pre>
+			</section>
+			<section>
+				<h3>When adding tests to legacy code, change the code, not the test, to generate a failure</h3>
+				<hr/>
+			</section>
+			<section>
+				<h3>Custom Failure Messages</h3>
+
+				<pre><code class="tsql">EXEC tSQLt.AssertEqualsTable 
+@Expected = N'Expected', @Actual = N'Actual',
+@FailMsg = 'Failed to add track to existing Album';
+</code></pre>
+				<hr/>
+				<pre><code class="nohighlight">
+[AddTrackToAlbum].[test existing track added to existing album succeeds] failed: 
+(Failure) Failed to add track to existing Album
+|_m_|AlbumId|TrackId|
++---+-------+-------+
+|<  |456    |345    |
+|>  |!NULL! |345    |    
+</code></pre>
+
+
+
+
+			</section>
+			<section>
+					<pre><code class="nohighlight" data-noescape data-trim>
+			<mark>[AddTrackToAlbum]</mark>.[test existing track added to existing album succeeds] failed: 
+			(Failure) Failed to add track to existing Album
+			|_m_|AlbumId|TrackId|
+			+---+-------+-------+
+			|<  |456    |345    |
+			|>  |!NULL! |345    |    
+							</code></pre>
+			<ul>
+				<li>The thing we are testing</li>
+			</ul>
+			
+			</section>
+			<section>
+					<pre><code class="nohighlight" data-noescape data-trim>
+			[AddTrackToAlbum].[test <mark>existing track added to existing album</mark> succeeds] failed: 
+			(Failure) Failed to add track to existing Album
+			|_m_|AlbumId|TrackId|
+			+---+-------+-------+
+			|<  |456    |345    |
+			|>  |!NULL! |345    |    
+							</code></pre>
+			<ul>
+				<li>The thing we are testing</li>
+				<li>What we did</li>
+			</ul>
+			
+			</section>
+			<section>
+					<pre><code class="nohighlight" data-noescape data-trim>
+			[AddTrackToAlbum].[test existing track added to existing album <mark>succeeds</mark>] failed: 
+			(Failure) Failed to add track to existing Album
+			|_m_|AlbumId|TrackId|
+			+---+-------+-------+
+			|<  |456    |345    |
+			|>  |!NULL! |345    |    
+							</code></pre>
+			<ul>
+				<li>The thing we are testing</li>
+				<li>What we did</li>
+				<li>What we expected to happen</li>
+			</ul>
+			
+			</section>
+
+			<section>
+
+				<h3>Naming Conventions make custom messages redundant</h3>
+				<hr/>
+			</section>
+
+
+
+			<section>
+				<h3>A new feature</h3>
+				<pre class="stretch, tsql">
+<code>CREATE FUNCTION GetTracksPurchasedByCustomer(@CustomerId INT)
+RETURNS TABLE
+AS RETURN
+( 
+  SELECT    Track.Name AS TrackName ,
+            CAST(Invoice.InvoiceDate AS DATE) AS InvoiceDate ,
+            InvoiceLine.UnitPrice
+  FROM      Invoice
+            INNER JOIN InvoiceLine 
+            ON Invoice.InvoiceId = InvoiceLine.InvoiceId
+            INNER JOIN Track 
+            ON InvoiceLine.TrackId = Track.TrackID
+            WHERE Invoice.CustomerId = @CustomerId
+
+)
+</code></pre>
+
+			</section>
+			<section>
+				<h3>Testing 1, 2, 3 (or 0, 1,
+					<i>n</i> )</h3>
+				<pre class="stretch">
+<code class="tsql" data-trim>CREATE PROCEDURE 
+GetTracksPurchasedByCustomer.[test no purchases returns empty result set] 
+AS
+EXEC tSQLt.FakeTable 'dbo.Track';
+EXEC tSQLt.FakeTable 'dbo.InvoiceLine';
+EXEC tSQLt.FakeTable 'dbo.Invoice';
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) 
+VALUES (123, 'Under The Moon of Love', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) 
+VALUES (234, 123, 888.88);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) 
+VALUES (234, 456, '2016-05-02');
+
+SELECT * INTO Actual FROM dbo.GetTracksPurchasedByCustomer(457);
+
+EXEC tSQLt.AssertEmptyTable 'Actual';
+                        </code></pre>
+				<aside class="notes">
+					Common pattern in both software design and test design
+					<br/> (Willem van der Poel: Zero:One:Infinity)
+				</aside>
+			</section>
+			<section>
+				<h3>Testing 1, 2, 3 (or 0, 1,
+					<i>n</i> )</h3>
+				<pre class="stretch">
+<code class="tsql" data-trim>CREATE PROCEDURE 
+GetTracksPurchasedByCustomer.[test single purchase returns one row]
+AS
+EXEC tSQLt.FakeTable 'dbo.Track';
+EXEC tSQLt.FakeTable 'dbo.InvoiceLine';
+EXEC tSQLt.FakeTable 'dbo.Invoice';
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) 
+    VALUES (123, 'Under The Moon of Love', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) 
+    VALUES (234, 123, 888.88);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) 
+    VALUES (234, 456, '2016-05-02');
+
+SELECT * INTO Actual FROM dbo.GetTracksPurchasedByCustomer(456);
+SELECT * INTO Expected FROM (VALUES
+('Under The Moon of Love', CAST('2016-05-02' AS DATE), 888.88)) 
+AS t(TrackName, InvoiceDate, UnitPrice);
+
+EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';                        </code></pre>
+
+			</section>
+			<section>
+				<h3>Testing 1, 2, 3 (or 0, 1,
+					<i>n</i> )</h3>
+				<pre class="stretch">
+<code class="tsql" data-trim>CREATE PROCEDURE 
+GetTracksPurchasedByCustomer.[test separate purchases return separate rows]
+AS
+EXEC tSQLt.FakeTable 'dbo.Track';
+EXEC tSQLt.FakeTable 'dbo.InvoiceLine';
+EXEC tSQLt.FakeTable 'dbo.Invoice';
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) 
+    VALUES (123, 'Under The Moon of Love', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) 
+    VALUES (234, 123, 888.88);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) 
+    VALUES (234, 456, '2016-05-02');
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) 
+    VALUES (789, 'Hey Rock and Roll', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) 
+    VALUES (567, 789, 777.77);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) 
+    VALUES (567, 456, '2016-05-02');
+
+
+SELECT * INTO Actual FROM dbo.GetTracksPurchasedByCustomer(456);
+SELECT * INTO Expected FROM (VALUES
+('Under The Moon of Love', CAST('2016-05-02' AS DATE), 888.88),
+('Hey Rock and Roll', CAST('2016-05-02' AS DATE), 777.77)
+
+) 
+AS t(TrackName, InvoiceDate, UnitPrice);
+
+EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';
+                      </code></pre>
+
+			</section>
+
+			<section>
+				<h3>Test Setup Procedure</h3>
+				<p>Called before
+					<i>every</i> test</p>
+				<pre class="stretch">
+<code class="tsql">CREATE PROCEDURE GetTracksPurchasedByCustomer.Setup
+AS
+EXEC tSQLt.FakeTable 'dbo.Track';
+EXEC tSQLt.FakeTable 'dbo.InvoiceLine';
+EXEC tSQLt.FakeTable 'dbo.Invoice';
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) VALUES (123, 'Dancin'' Party', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) VALUES (234, 123, 666.66);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) VALUES (234, 457, '2016-05-02');
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) VALUES (789, 'Hey Rock and Roll', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) VALUES (567, 789, 777.77);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) VALUES (567, 457, '2016-05-02');
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) VALUES (432, 'Under The Moon of Love', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) VALUES (678, 432, 888.88);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) VALUES (678, 456, '2016-05-02');</code></pre>
+
+			</section>
+			<section>
+				<h3>Test using setup procedure</h3>
+				<pre class="stretch">
+<code class="tsql">CREATE PROCEDURE GetTracksPurchasedByCustomer.[test separate purchases return separate rows]
+AS
+
+
+--Act
+SELECT * INTO Actual FROM dbo.GetTracksPurchasedByCustomer(457);
+
+--Assert
+SELECT * INTO Expected FROM (VALUES
+('Dancin'' Party', CAST('2016-05-02' AS DATE), 666.66),
+('Hey Rock and Roll', CAST('2016-05-02' AS DATE), 777.77)
+
+) 
+AS t(TrackName, InvoiceDate, UnitPrice);
+
+EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';
+                </code></pre>
+			</section>
+			<section>
+				<h3>A better way</h3>
+				<pre class="stretch">
+<code class="tsql">CREATE PROCEDURE 
+GetTracksPurchasedByCustomer.[Fake Track, Invoice, and Invoice Line]
+AS
+EXEC tSQLt.FakeTable 'dbo.Track';
+EXEC tSQLt.FakeTable 'dbo.InvoiceLine';
+EXEC tSQLt.FakeTable 'dbo.Invoice';
+</code></pre>
+
+			</section>
+			<section>
+				<h3>A Test Data Builder</h3>
+				<pre class="stretch">
+<code class="tsql">CREATE PROCEDURE 
+GetTracksPurchasedByCustomer.[Create Invoice For One Track] 
+@TrackName nvarchar(200) = NULL, @TrackPrice numeric(10, 2) = NULL,
+@InvoiceLinePrice numeric(10, 2) = NULL, @InvoiceDate date = NULL, 
+@Composer nvarchar(220) = NULL, @Quantity int = NULL,
+--blah blah more params, all NULL
+@CustomerID INT OUTPUT
+AS
+DECLARE @TrackID INT = ABS(Checksum(NewID()) % 1000);
+DECLARE @InvoiceID INT = ABS(Checksum(NewID()) % 1000);
+SET @CustomerID  = ABS(Checksum(NewID()) % 1000);
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) 
+VALUES (@TrackID, @TrackName, @TrackPrice);
+
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) 
+VALUES (@InvoiceID, @TrackID, @InvoiceLinePrice);
+
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) 
+VALUES (@InvoiceID, @CustomerID, @InvoiceDate);
+</code></pre>
+
+			</section>
+			<section>
+				<h3>The revised test</h3>
+				<pre class="stretch">
+<code class="tsql">CREATE PROCEDURE GetTracksPurchasedByCustomer.[test single purchase returns one row]
+AS
+--Arrange
+EXEC GetTracksPurchasedByCustomer.[Fake Track, Invoice, and Invoice Line]
+DECLARE @CustomerID int;
+EXEC GetTracksPurchasedByCustomer.[Create Invoice For One Track] 
+    @TrackName = 'Under The Moon of Love',
+    @InvoiceDate = '2016-05-02', 
+    @InvoiceLinePrice = '888.88',
+    @CustomerId = @CustomerId OUTPUT;
+--Act
+SELECT * INTO Actual 
+FROM dbo.GetTracksPurchasedByCustomer(@CustomerId);
+--Assert
+SELECT * INTO Expected FROM (VALUES
+('Under The Moon of Love', CAST('2016-05-02' AS DATE), 888.88)) 
+AS t(TrackName, InvoiceDate, UnitPrice);
+
+EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';
+
+</code></pre>
+
+			</section>
+			<section>
+
+				<h3>Use helper procedures and data builders, not setup procedures</h3>
+				<hr/>
+			</section>
+
+			<section>
+				<p>Table
+					<code>dbo.PlayListTrack</code>
+				</p>
+				<table>
+					<thead>
+						<tr>
+							<th>PlaylistId</th>
+							<th>TrackId</th>
+							<th>DateAdded</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>PK, FK, int, not null</td>
+							<td>PK, FK, int, not null</td>
+							<td>datetime2, not null</td>
+						</tr>
+					</tbody>
+				</table>
+				<pre class="stretch">
+<code class="tsql">CREATE PROCEDURE AddTrackToPlaylist @TrackID INT, @PlaylistID INT
+AS
+MERGE dbo.PlaylistTrack as t
+
+USING (VALUES (@TrackID, @PlaylistID)) as s(TrackID, PlaylistID)
+    ON t.TrackID = s.TrackID AND t.PlaylistID = s.PlaylistID
+
+WHEN NOT MATCHED THEN INSERT (PlaylistID, TrackID, DateAdded) 
+    VALUES (s.PlaylistID, s.TrackID, SYSUTCDATETIME())
+
+WHEN MATCHED THEN UPDATE SET DateAdded = SYSUTCDATETIME();</code></pre>
+
+
+
+			</section>
+			<section>
+				<h4>What goes in the ???</h4>
+				<pre class="stretch">
+<code class="tsql">CREATE PROCEDURE 
+AddTrackToPlaylist[test valid track and playlist inserted]
+AS
+--Arrange
+EXEC tSQLt.FakeTable 'dbo.PlaylistTrack';
+
+--Act
+EXEC AddTrackToPlaylist @TrackId = 66, @PlayListId = 67;
+
+--Assert
+SELECT * INTO Expected 
+    FROM (VALUES(67, 66, '???')) as 
+    t(PlaylistID, TrackID, DateAdded);
+
+SELECT PlayListID, TrackID, DateAdded into Actual 
+    from dbo.PlaylistTrack;
+
+EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';</code></pre>
+
+
+			</section>
+			<section>
+				<h4>The quick solution</h4>
+				<pre class="stretch">
+<code class="tsql">CREATE PROCEDURE 
+AddTrackToPlaylist[test valid track and playlist inserted]
+AS
+--Arrange
+EXEC tSQLt.FakeTable 'dbo.PlaylistTrack';
+
+--Act
+EXEC AddTrackToPlaylist @TrackId = 66, @PlayListId = 67;
+
+--Assert
+SELECT * INTO Expected FROM 
+    (VALUES(67, 66, CAST(SYSUTCDATETIME() AS Date))) as 
+        t(PlaylistID, TrackID, DateAdded);
+SELECT PlayListID, TrackID, CAST(DateAdded AS Date) as DateAdded 
+    into Actual from dbo.PlaylistTrack;
+
+EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';</code></pre>
+
+
+			</section>
+			<section>
+				<h4>Refactoring the procedure</h4>
+				<pre class="stretch">
+<code class="tsql">CREATE PROCEDURE AddTrackToPlaylist @TrackID INT, @PlaylistID INT, 
+    @DateAdded datetime2 = NULL
+AS
+
+SET @DateAdded = ISNULL(@DateAdded, SYSUTCDATETIME());
+
+MERGE dbo.PlaylistTrack as t
+USING (VALUES (@TrackID, @PlaylistID)) as s(TrackID, PlaylistID)
+ON t.TrackID = s.TrackID AND t.PlaylistID = s.PlaylistID
+
+WHEN NOT MATCHED THEN INSERT (PlaylistID, TrackID, DateAdded) 
+    VALUES (s.PlaylistID, s.TrackID, @DateAdded)
+
+WHEN MATCHED THEN UPDATE SET DateAdded = @DateAdded;</code></pre>
+
+
+			</section>
+			<section>
+				<h4>The updated test</h4>
+				<pre class="stretch">
+<code class="tsql">CREATE PROCEDURE 
+AddTrackToPlaylist.[test valid track and playlist inserted]
+AS
+--Arrange
+EXEC tSQLt.FakeTable 'dbo.PlaylistTrack';
+DECLARE @theTimeNow datetime2 = SYSUTCDATETIME();
+--Act
+EXEC AddTrackToPlaylist @TrackId = 66, @PlayListId = 67, 
+    @DateAdded = @theTimeNow;
+
+--Assert
+SELECT * INTO Expected FROM (VALUES(67, 66, @theTimeNow)) 
+    as t(PlaylistID, TrackID, DateAdded);
+SELECT PlayListID, TrackID, DateAdded into Actual 
+    from dbo.PlaylistTrack;
+
+EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';</code></pre>
+			</section>
+			<section>
+				<h3>It's OK to rewrite the code to make it easier to test!</h3>
+				<hr/>
+				<h3>Pass dependencies as optional parameters where possible</h3>
+			</section>
+			<section>
+				<h4>The eierlegende Wollmilchsau</h4>
+				<pre class="stretch">
+<code class="tsql">CREATE PROCEDURE DoAllTheThings @DayOfWeek varchar(10)
+AS
+--Runs every night to perform various tasks
+BEGIN
+IF (@DayOfWeek = 'Monday')
+BEGIN
+	DELETE FROM Genre WHERE NOT EXISTS
+	(SELECT * FROM Track WHERE Track.GenreId = Genre.GenreId)
+
+END
+
+ELSE IF (@DayOfWeek = 'Wednesday')
+BEGIN
+	UPDATE Track SET UnitPrice = UnitPrice * 1.01;
+	UPDATE Customer SET PostalCode = GetPostalCodeFromExernalService(Address)
+	WHERE PostalCode IS NULL;
+END
+ELSE IF (@DayOfWeek = 'Thursday')
+BEGIN
+	;WITH Sales as(
+	SELECT Artist.ArtistID, Artist.Name, COUNT(InvoiceLineID) as Sales
+	FROM InvoiceLine JOIN Track ON InvoiceLine.TrackID = Track.TrackId
+	Join Album ON Track.AlbumId = Album.AlbumID
+	JOIN Artist ON Album.ArtistId = Artist.ArtistId
+	GROUP BY Artist.ArtistID, Artist.Name),
+	SalesRank as 
+
+	(SELECT ArtistId, Name,  Row_Number() over (order by sales desc) as Popularity FROM Sales
+	)
+
+	UPDATE Artist SET Popularity = (select popularity from SalesRank where SalesRank.ArtistId = Artist.ArtistId)
+END
+
+ELSE IF (@DayOfWeek = 'Friday')
+BEGIN
+	DECLARE c CURSOR for
+	SELECT Email FROM Employee
+	 WHERE (DATEDIFF(dd, getdate(), DATEADD(yyyy, DATEDIFF(yyyy, birthdate, getdate()) + 1, birthdate))) % 366 <= 7
+	 DECLARE @email varchar(60)
+	 open c
+	 FETCH NEXT FROM c INTO @email
+	 WHILE @@FETCH_STATUS = 0
+	 BEGIN
+		EXEC msdb..sp_send_dbmail @recipients = @email, @subject = 'Birthday Greetings', @body = 'Happy Birthday for next week'
+		FETCH NEXT FROM c INTO @email
+	 END
+	 CLOSE c
+	 DEALLOCATE c
+END
+
+ELSE
+BEGIN
+	EXEC xp_logevent 50234, 'I''m a pointless log message'
+END
+END</code></pre>
+			</section>
+			<section>
+				<h3>Mock All the Things</h3>
+				<pre class="stretch"><code class="tsql">
+ CREATE PROCEDURE DoAllTheThings.[Mock All the Things]   
+ AS
+
+EXEC tSQLT.FakeTable 'Genre';
+EXEC tSQLT.FakeTable 'Track';
+EXEC tSQLT.FakeTable 'Employee';
+EXEC tSQLT.FakeTable 'Customer';
+EXEC tSQLT.FakeTable 'Artist';
+EXEC tSQLT.FakeTable 'InvoiceLine';
+
+    </code></pre>
+			</section>
+			<section>
+				<h3>Refactoring the Procedure</h3>
+				<pre class="stretch"><code class="tsql">CREATE PROCEDURE DoAllTheThings @DayOfWeek varchar(10)
+AS
+--Runs every night to perform various tasks
+BEGIN
+IF (@DayOfWeek = 'Monday')
+BEGIN
+	EXEC DeleteEmptyGenres;
+	EXEC UpdateArtistRankings;
+END
+ELSE IF (@DayOfWeek = 'Wednesday')
+BEGIN
+	EXEC IncreasePrices;
+	EXEC UpdateMissingPostcodes;
+END
+ELSE IF (@DayOfWeek = 'Thursday')
+BEGIN
+	EXEC UpdateArtistRankings;
+END
+
+ELSE IF (@DayOfWeek = 'Friday')
+BEGIN
+	EXEC SendBirthdayGreetings(7);
+END
+
+ELSE
+BEGIN
+	EXEC DoPointlessLogging;
+END
+END
+    </code></pre>
+
+			</section>
+			<section>
+				<h3>A specific Test</h3>
+				<pre class="stretch"><code class="tsql">CREATE PROCEDURE DoAllTheThings.[test On Thursday we update artist rankings]
+AS
+--arrange
+EXEC tsqlt.SpyProcedure 'UpdateArtistRankings'
+
+--act
+
+EXEC DoAllTheThings 'Thursday';
+
+--assert
+
+DECLARE @executionCount int = 
+    (select COUNT(*) from UpdateArtistRankings_SpyProcedureLog);
+
+EXEC tSQLt.AssertEquals 1, @executionCount;
+    </code></pre>
+
+			</section>
+			<section>
+				<h3>A negative Test</h3>
+				<pre class="stretch"><code class="tsql">CREATE PROCEDURE 
+DoAllTheThings.[test On Thursday postcode update not called]
+AS
+--arrange
+EXEC tsqlt.SpyProcedure 'UpdateMissingPostcodes'
+
+--act
+
+EXEC DoAllTheThings 'Thursday';
+
+--assert
+
+DECLARE @executionCount int = 
+    (select COUNT(*) from UpdateMissingPostcodes_SpyProcedureLog);
+
+EXEC tSQLt.AssertEquals 0, @executionCount;
+    </code></pre>
+
+			</section>
+			<section>
+				<h3>Wrapping the things we can't Mock</h3>
+				<pre><code class="tsql">EXEC xp_logevent 50234, 'I''m a pointless log message'
+    </code></pre>
+
+				<pre><code class="tsql, fragment" data-trim>CREATE PROCEDURE DoPointlessLogging
+AS
+BEGIN
+EXEC xp_logevent 50234, 'I''m a pointless log message'
+END
+    </code></pre>
+
+			</section>
+			<section>
+				<h3>Wrapping the things we can't Mock</h3>
+				<pre class="stretch"><code class="tsql">CREATE PROCEDURE DoAllTheThings.
+[test On Thursday pointless logging not called]
+AS
+--arrange
+EXEC tsqlt.SpyProcedure 'DoPointlessLogging'
+
+--act
+
+EXEC DoAllTheThings 'Thursday';
+
+--assert
+
+DECLARE @executionCount int = 
+    (select COUNT(*) from DoPointlessLogging_SpyProcedureLog);
+
+EXEC tSQLt.AssertEquals 0, @executionCount;
+    </code></pre>
+
+			</section>
+
+			<section>
+				<h3>Mocking the whole world is a sign that the procedure is doing too much</h3>
+				<hr/>
+				<h3>If you have difficulty saying what the test condition is, you're going to have difficulty maintaining it</h3>
+			</section>
+
+		</div>
+	</div>
+
+	<script src="lib/js/head.min.js"></script>
+	<script src="js/reveal.js"></script>
+
+	<script>
+		// More info about config & dependencies:
+		// - https://github.com/hakimel/reveal.js#configuration
+		// - https://github.com/hakimel/reveal.js#dependencies
+		Reveal.initialize({
+			transition: 'none',
+			width: 1920,
+			height: 1080,
+			slideNumber: 'c/t',
+			dependencies: [
+				{ src: 'plugin/markdown/marked.js' },
+				{ src: 'plugin/markdown/markdown.js' },
+				{ src: 'plugin/notes/notes.js', async: true },
+				{ src: 'plugin/highlight/highlight.js', async: true, callback: function () { hljs.initHighlightingOnLoad(); } }
+			]
+		});
+	</script>
+</body>
+
+</html>
