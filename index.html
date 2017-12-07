@@ -31,7 +31,10 @@
 				<h1>Effective Unit Testing for SQL Server</h1>
 				<hr/>
 				<h3>Gavin Campbell</h3>
-				<h3>arapaima.uk</h3>
+				<h3>
+					<a href="http://arapaima.uk">arapaima.uk</a>
+				</h3>
+
 			</section>
 			<section>
 				<h2>Stay in touch</h2>
@@ -42,10 +45,12 @@
 			</section>
 			<section>
 				<h2>What is Unit Testing?</h2>
-				<h2 class="fragment">What is a "Unit"?</h2>
-				<span class="fragment">
-					<blockquote>The primary goal of unit testing is to take the smallest piece of testable software in the application, isolate it from
-						the remainder of the code, and determine whether it behaves exactly as you expect.</blockquote>
+				<h2 class="fragment" data-fragment-index="1">What is a "Unit"?</h2>
+				<span class="fragment" data-fragment-index="2">
+					<blockquote>The primary goal of unit testing is to take the
+						<span class="fragment highlight-current-blue" data-fragment-index="3">smallest piece of testable software</span> in the application,
+						<span class="fragment highlight-current-blue" data-fragment-index="4">isolate</span> it from the remainder of the code, and determine whether it behaves
+						<span class="fragment highlight-current-blue" data-fragment-index="5">exactly as you expect</span>.</blockquote>
 
 					<cite>
 						<a href="https://www.microsoft.com/en-us/download/details.aspx?id=55979">MSDN, Visual Studio 2003 Documentation</a>
@@ -115,7 +120,7 @@
 			</section>
 
 
-			<section>
+			<!-- 			<section>
 				<h2>What makes a "good" Unit Test</h2>
 				<ul>
 					<li>Fast</li>
@@ -123,7 +128,7 @@
 					<li>Reliable</li>
 					<li>Specific</li>
 				</ul>
-			</section>
+			</section> -->
 
 			<section>
 				<h2>The Test Pyramid</h2>
@@ -292,6 +297,28 @@ SELECT * FROM Album WHERE AlbumId = 348;
 </code></pre>
 			</section>
 			<section>
+				<h3>"ARRANGE - ACT - ASSERT"</h3>
+				<pre><code class="tsql"  data-trim data-noescape>
+	--Arrange
+	INSERT INTO dbo.Artist(ArtistId,Name) 
+		VALUES (276, 'Showaddywaddy');
+	
+	INSERT INTO dbo.Album (AlbumId, Title, ArtistId) 
+		VALUES(348, 'Trocadero', 276);
+	
+	INSERT INTO dbo.Track(TrackId, Name, AlbumId, MediaTypeId, 
+		Milliseconds, UnitPrice)
+		VALUES (3504, 'Under The Moon of Love', 348, 
+		2, 180000, 999.99);
+	--Act
+	EXEC dbo.AddTrackToAlbum @TrackID = 3504, @AlbumId = 348;
+	--Assert					
+	SELECT * FROM Album WHERE AlbumId = 348;
+	
+	</code></pre>
+			</section>
+			<section>
+
 				<h3>A Library of Tests</h3>
 				<img class="stretch" src="images/tooManyFiles.png" />
 				<aside class="notes">Could we automated running all these?
@@ -337,7 +364,7 @@ SELECT * FROM Album WHERE AlbumId = 348;
 				<ul>
 					<li>Test Classes</li>
 					<li>Assertions</li>
-					<li>Mocks</li>
+
 				</ul>
 				<hr/>
 
@@ -357,6 +384,16 @@ SELECT * FROM Album WHERE AlbumId = 348;
 					<li>Text / XML </li>
 
 				</ul>
+				<span class="fragment">
+					<hr/>
+					<h5>Tools for isolating dependencies</h5>
+					<li>
+						<code>tSQLt.FakeTable, tSQLt.FakeFunction, etc.</code>
+					</li>
+					<li>
+						<code>tSQLt.SpyProcedure</code>
+					</li>
+				</span>
 			</section>
 
 			<section>
@@ -414,7 +451,8 @@ SELECT * FROM Album WHERE AlbumId = 348;
 			<section>
 				<h4>A tSQLt Test</h4>
 
-				<pre class="stretch"><code class="tsql">EXEC tSQLt.NewTestClass @ClassName = N'AddTrackToAlbum'
+				<pre class="stretch"><code class="tsql" data-trim>
+EXEC tSQLt.NewTestClass @ClassName = N'AddTrackToAlbum'
 GO
 CREATE PROCEDURE 
 AddTrackToAlbum.[test existing track added to existing album succeeds]
@@ -441,7 +479,8 @@ END
 			<section>
 				<h4>Arrange</h4>
 
-				<pre class="stretch"><code class="tsql" data-noescape>EXEC tSQLt.NewTestClass @ClassName = N'AddTrackToAlbum'
+				<pre class="stretch"><code class="tsql" data-noescape data-trim>
+EXEC tSQLt.NewTestClass @ClassName = N'AddTrackToAlbum'
 GO
 CREATE PROCEDURE 
 AddTrackToAlbum.[test existing track added to existing album succeeds]
@@ -468,7 +507,8 @@ END
 			<section>
 				<h4>Act</h4>
 
-				<pre class="stretch"><code class="tsql" data-noescape>EXEC tSQLt.NewTestClass @ClassName = N'AddTrackToAlbum'
+				<pre class="stretch"><code class="tsql" data-noescape data-trim>
+EXEC tSQLt.NewTestClass @ClassName = N'AddTrackToAlbum'
 GO
 CREATE PROCEDURE 
 AddTrackToAlbum.[test existing track added to existing album succeeds]
@@ -495,7 +535,8 @@ END
 			<section>
 				<h4>Assert</h4>
 
-				<pre class="stretch"><code class="tsql" data-noescape>EXEC tSQLt.NewTestClass @ClassName = N'AddTrackToAlbum'
+				<pre class="stretch"><code class="tsql" data-noescape data-trim>
+EXEC tSQLt.NewTestClass @ClassName = N'AddTrackToAlbum'
 GO
 CREATE PROCEDURE 
 AddTrackToAlbum.[test existing track added to existing album succeeds]
@@ -519,10 +560,210 @@ END
 </code></pre>
 
 			</section>
+
+			<section>
+				<h4>A tSQLt Test</h4>
+
+				<pre class="stretch"><code class="tsql" data-noescape data-trim>
+<mark>EXEC tSQLt.NewTestClass @ClassName = N'AddTrackToAlbum'</mark>
+GO
+CREATE PROCEDURE 
+AddTrackToAlbum.[test existing track added to existing album succeeds]
+AS
+BEGIN
+
+EXEC tSQLt.FakeTable 'dbo.Album';
+EXEC tSQLt.FakeTable 'dbo.Track';
+DECLARE @track_id int = 345, @album_id int = 456
+INSERT INTO dbo.Album(AlbumId) VALUES (@album_id);
+INSERT INTO dbo.Track(TrackId) VALUES (@track_id);
+
+EXEC dbo.AddTrackToAlbum @TrackId = @track_id, @AlbumId = @album_id;
+
+SELECT @album_id as AlbumId, @track_id as TrackId into Expected;
+SELECT AlbumId, TrackId INTO Actual FROM Track;
+
+EXEC tSQLt.AssertEqualsTable 
+@Expected = N'Expected', @Actual = N'Actual';
+END
+</code></pre>
+				<aside class="notes">Fakes</br>Expected/Actual</br>asserts</br>
 			</section>
 			<section>
+				<h4>A tSQLt Test</h4>
+
+				<pre class="stretch"><code class="tsql" data-noescape data-trim>
+EXEC tSQLt.NewTestClass @ClassName = N'AddTrackToAlbum'
+GO
+<mark>CREATE PROCEDURE 
+AddTrackToAlbum.[test existing track added to existing album succeeds]</mark>
+AS
+BEGIN
+
+EXEC tSQLt.FakeTable 'dbo.Album';
+EXEC tSQLt.FakeTable 'dbo.Track';
+DECLARE @track_id int = 345, @album_id int = 456
+INSERT INTO dbo.Album(AlbumId) VALUES (@album_id);
+INSERT INTO dbo.Track(TrackId) VALUES (@track_id);
+
+EXEC dbo.AddTrackToAlbum @TrackId = @track_id, @AlbumId = @album_id;
+
+SELECT @album_id as AlbumId, @track_id as TrackId into Expected;
+SELECT AlbumId, TrackId INTO Actual FROM Track;
+
+EXEC tSQLt.AssertEqualsTable 
+@Expected = N'Expected', @Actual = N'Actual';
+END
+</code></pre>
+				<aside class="notes">Fakes</br>Expected/Actual</br>asserts</br>
+			</section>
+
+			<section>
+				<h4>A tSQLt Test</h4>
+
+				<pre class="stretch"><code class="tsql" data-noescape data-trim>
+EXEC tSQLt.NewTestClass @ClassName = N'AddTrackToAlbum'
+GO
+CREATE PROCEDURE 
+AddTrackToAlbum.[test existing track added to existing album succeeds]
+AS
+BEGIN
+		
+<mark>EXEC tSQLt.FakeTable 'dbo.Album';
+EXEC tSQLt.FakeTable 'dbo.Track';</mark>
+DECLARE @track_id int = 345, @album_id int = 456
+INSERT INTO dbo.Album(AlbumId) VALUES (@album_id);
+INSERT INTO dbo.Track(TrackId) VALUES (@track_id);
+
+EXEC dbo.AddTrackToAlbum @TrackId = @track_id, @AlbumId = @album_id;
+
+SELECT @album_id as AlbumId, @track_id as TrackId into Expected;
+SELECT AlbumId, TrackId INTO Actual FROM Track;
+
+EXEC tSQLt.AssertEqualsTable 
+@Expected = N'Expected', @Actual = N'Actual';
+END
+</code></pre>
+				<aside class="notes">Fakes</br>Expected/Actual</br>asserts</br>
+			</section>
+			<section>
+					<h4>A tSQLt Test</h4>
+	
+					<pre class="stretch"><code class="tsql" data-noescape data-trim>
+	EXEC tSQLt.NewTestClass @ClassName = N'AddTrackToAlbum'
+	GO
+	CREATE PROCEDURE 
+	AddTrackToAlbum.[test existing track added to existing album succeeds]
+	AS
+	BEGIN
+			
+	EXEC tSQLt.FakeTable 'dbo.Album';
+	EXEC tSQLt.FakeTable 'dbo.Track';
+	<mark>DECLARE @track_id int = 345, @album_id int = 456
+	INSERT INTO dbo.Album(AlbumId) VALUES (@album_id);
+	INSERT INTO dbo.Track(TrackId) VALUES (@track_id);</mark>
+	
+	EXEC dbo.AddTrackToAlbum @TrackId = @track_id, @AlbumId = @album_id;
+	
+	SELECT @album_id as AlbumId, @track_id as TrackId into Expected;
+	SELECT AlbumId, TrackId INTO Actual FROM Track;
+	
+	EXEC tSQLt.AssertEqualsTable 
+	@Expected = N'Expected', @Actual = N'Actual';
+	END
+	</code></pre>
+					<aside class="notes">Fakes</br>Expected/Actual</br>asserts</br>
+				</section>
+				<section>
+						<h4>A tSQLt Test</h4>
+		
+						<pre class="stretch"><code class="tsql" data-noescape data-trim>
+		EXEC tSQLt.NewTestClass @ClassName = N'AddTrackToAlbum'
+		GO
+		CREATE PROCEDURE 
+		AddTrackToAlbum.[test existing track added to existing album succeeds]
+		AS
+		BEGIN
+				
+		EXEC tSQLt.FakeTable 'dbo.Album';
+		EXEC tSQLt.FakeTable 'dbo.Track';
+		DECLARE @track_id int = 345, @album_id int = 456
+		INSERT INTO dbo.Album(AlbumId) VALUES (@album_id);
+		INSERT INTO dbo.Track(TrackId) VALUES (@track_id);
+		
+		<mark>EXEC dbo.AddTrackToAlbum @TrackId = @track_id, @AlbumId = @album_id;</mark>
+		
+		SELECT @album_id as AlbumId, @track_id as TrackId into Expected;
+		SELECT AlbumId, TrackId INTO Actual FROM Track;
+		
+		EXEC tSQLt.AssertEqualsTable 
+		@Expected = N'Expected', @Actual = N'Actual';
+		END
+		</code></pre>
+						<aside class="notes">Fakes</br>Expected/Actual</br>asserts</br>
+					</section>							
+			<section>
+				<h4>A tSQLt Test</h4>
+
+				<pre class="stretch"><code class="tsql" data-noescape data-trim>
+EXEC tSQLt.NewTestClass @ClassName = N'AddTrackToAlbum'
+GO
+CREATE PROCEDURE 
+AddTrackToAlbum.[test existing track added to existing album succeeds]
+AS
+BEGIN
+
+EXEC tSQLt.FakeTable 'dbo.Album';
+EXEC tSQLt.FakeTable 'dbo.Track';
+DECLARE @track_id int = 345, @album_id int = 456
+INSERT INTO dbo.Album(AlbumId) VALUES (@album_id);
+INSERT INTO dbo.Track(TrackId) VALUES (@track_id);
+
+EXEC dbo.AddTrackToAlbum @TrackId = @track_id, @AlbumId = @album_id;
+
+<mark>SELECT @album_id as AlbumId, @track_id as TrackId into Expected;
+SELECT AlbumId, TrackId INTO Actual FROM Track;</mark>	
+
+EXEC tSQLt.AssertEqualsTable 
+@Expected = N'Expected', @Actual = N'Actual';
+END
+</code></pre>
+				<aside class="notes">Fakes</br>Expected/Actual</br>asserts</br>
+			</section>
+
+			<section>
+				<h4>A tSQLt Test</h4>
+
+				<pre class="stretch"><code class="tsql" data-noescape data-trim>
+EXEC tSQLt.NewTestClass @ClassName = N'AddTrackToAlbum'
+GO
+CREATE PROCEDURE 
+AddTrackToAlbum.[test existing track added to existing album succeeds]
+AS
+BEGIN
+
+EXEC tSQLt.FakeTable 'dbo.Album';
+EXEC tSQLt.FakeTable 'dbo.Track';
+DECLARE @track_id int = 345, @album_id int = 456
+INSERT INTO dbo.Album(AlbumId) VALUES (@album_id);
+INSERT INTO dbo.Track(TrackId) VALUES (@track_id);
+
+EXEC dbo.AddTrackToAlbum @TrackId = @track_id, @AlbumId = @album_id;
+
+SELECT @album_id as AlbumId, @track_id as TrackId into Expected;
+SELECT AlbumId, TrackId INTO Actual FROM Track;
+
+<mark>EXEC tSQLt.AssertEqualsTable 
+@Expected = N'Expected', @Actual = N'Actual';</mark>
+END
+</code></pre>
+				<aside class="notes">Fakes</br>Expected/Actual</br>asserts</br>
+			</section>
+
+
+			<section>
 				<pre><code class="tsql">EXEC tSQLt.RunAll;</code></pre>
-				<pre class="stretch"><code class="nohighlight" data-trim >
+				<pre class="fragment"><code class="nohighlight stretch" data-trim >
 +----------------------+
 |Test Execution Summary|
 +----------------------+
@@ -537,7 +778,7 @@ Test Case Summary: 1 test case(s) executed, 1 succeeded, 0 failed, 0 errored.
 			</section>
 			<section>
 				<h3>Making the test fail</h3>
-				<pre><code class="tsql">
+				<pre><code class="tsql" data-trim>
 ALTER PROCEDURE [dbo].[AddTrackToAlbum] 
 @TrackId int, @AlbumId int
 AS
@@ -545,31 +786,28 @@ AS
 UPDATE dbo.Track SET AlbumId = NULL WHERE TrackId = @TrackId
 GO
 </code></pre>
-				<pre><code class="tsql">
+				<pre><code class="tsql" data-trim>
 EXEC tSQLt.RunAll;
 </code></pre>
-			</section>
-			<section>
-				<pre class="stretch"><code class="nohighlight" data-trim >
-[AddTrackToAlbum].[test existing track added to existing album succeeds] failed: (Failure) Unexpected/missing resultset rows!
-|_m_|AlbumId|TrackId|
-+---+-------+-------+
-|<  |456    |345    |
-|>  |!NULL! |345    |
- 
-+----------------------+
-|Test Execution Summary|
-+----------------------+
- 
-|No|Test Case Name                                                            |Dur(ms)|Result |
-+--+--------------------------------------------------------------------------+-------+-------+
-|1 |[AddTrackToAlbum].[test existing track added to existing album succeeds]|    360|Failure|
------------------------------------------------------------------------------
-Msg 50000, Level 16, State 10, Line 30
-Test Case Summary: 1 test case(s) executed, 0 succeeded, 1 failed, 0 errored.
------------------------------------------------------------------------------
-</code></pre>
-
+				<pre class="fragment"><code class="nohighlight stretch" data-trim >
+		[AddTrackToAlbum].[test existing track added to existing album succeeds] failed: (Failure) Unexpected/missing resultset rows!
+		|_m_|AlbumId|TrackId|
+		+---+-------+-------+
+		|<  |456    |345    |
+		|>  |!NULL! |345    |
+		 
+		+----------------------+
+		|Test Execution Summary|
+		+----------------------+
+		 
+		|No|Test Case Name                                                            |Dur(ms)|Result |
+		+--+--------------------------------------------------------------------------+-------+-------+
+		|1 |[AddTrackToAlbum].[test existing track added to existing album succeeds]|    360|Failure|
+		-----------------------------------------------------------------------------
+		Msg 50000, Level 16, State 10, Line 30
+		Test Case Summary: 1 test case(s) executed, 0 succeeded, 1 failed, 0 errored.
+		-----------------------------------------------------------------------------
+		</code></pre>
 			</section>
 			<section>
 				<h3>Making the test fail</h3>
@@ -702,7 +940,7 @@ Test Case Summary: 1 test case(s) executed, 0 succeeded, 1 failed, 0 errored.
 
 			</section>
 			<section>
-					<pre><code class="nohighlight" data-noescape data-trim>
+				<pre><code class="nohighlight" data-noescape data-trim>
 			<mark>[AddTrackToAlbum]</mark>.[test existing track added to existing album succeeds] failed: 
 			(Failure) Failed to add track to existing Album
 			|_m_|AlbumId|TrackId|
@@ -710,13 +948,15 @@ Test Case Summary: 1 test case(s) executed, 0 succeeded, 1 failed, 0 errored.
 			|<  |456    |345    |
 			|>  |!NULL! |345    |    
 							</code></pre>
-			<ul>
-				<li>The thing we are testing</li>
-			</ul>
-			
+				<ul>
+					<em><li>The thing we are testing</li></em>
+					<li>What we did</li>
+					<li>What we expected to happen</li>
+				</ul>
+
 			</section>
 			<section>
-					<pre><code class="nohighlight" data-noescape data-trim>
+				<pre><code class="nohighlight" data-noescape data-trim>
 			[AddTrackToAlbum].[test <mark>existing track added to existing album</mark> succeeds] failed: 
 			(Failure) Failed to add track to existing Album
 			|_m_|AlbumId|TrackId|
@@ -724,14 +964,15 @@ Test Case Summary: 1 test case(s) executed, 0 succeeded, 1 failed, 0 errored.
 			|<  |456    |345    |
 			|>  |!NULL! |345    |    
 							</code></pre>
-			<ul>
-				<li>The thing we are testing</li>
-				<li>What we did</li>
-			</ul>
-			
+				<ul>
+					<li>The thing we are testing</li>
+					<em><li>What we did</li></em>
+					<li>What we expected to happen</li>
+				</ul>
+
 			</section>
 			<section>
-					<pre><code class="nohighlight" data-noescape data-trim>
+				<pre><code class="nohighlight" data-noescape data-trim>
 			[AddTrackToAlbum].[test existing track added to existing album <mark>succeeds</mark>] failed: 
 			(Failure) Failed to add track to existing Album
 			|_m_|AlbumId|TrackId|
@@ -739,12 +980,12 @@ Test Case Summary: 1 test case(s) executed, 0 succeeded, 1 failed, 0 errored.
 			|<  |456    |345    |
 			|>  |!NULL! |345    |    
 							</code></pre>
-			<ul>
-				<li>The thing we are testing</li>
-				<li>What we did</li>
-				<li>What we expected to happen</li>
-			</ul>
-			
+				<ul>
+					<li>The thing we are testing</li>
+					<li>What we did</li>
+					<em><li>What we expected to happen</li></em>
+				</ul>
+
 			</section>
 
 			<section>
@@ -807,7 +1048,88 @@ EXEC tSQLt.AssertEmptyTable 'Actual';
 				<h3>Testing 1, 2, 3 (or 0, 1,
 					<i>n</i> )</h3>
 				<pre class="stretch">
-<code class="tsql" data-trim>CREATE PROCEDURE 
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE 
+GetTracksPurchasedByCustomer.[test no purchases returns empty result set] 
+AS
+EXEC tSQLt.FakeTable 'dbo.Track';
+EXEC tSQLt.FakeTable 'dbo.InvoiceLine';
+EXEC tSQLt.FakeTable 'dbo.Invoice';
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) 
+VALUES (123, 'Under The Moon of Love', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) 
+VALUES (234, 123, 888.88);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) 
+VALUES (234, <mark>456</mark>, '2016-05-02');
+
+SELECT * INTO Actual FROM dbo.GetTracksPurchasedByCustomer(457);
+
+EXEC tSQLt.AssertEmptyTable 'Actual';
+                        </code></pre>
+				<aside class="notes">
+					Common pattern in both software design and test design
+					<br/> (Willem van der Poel: Zero:One:Infinity)
+				</aside>
+			</section>
+			<section>
+				<h3>Testing 1, 2, 3 (or 0, 1,
+					<i>n</i> )</h3>
+				<pre class="stretch">
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE 
+GetTracksPurchasedByCustomer.[test no purchases returns empty result set] 
+AS
+EXEC tSQLt.FakeTable 'dbo.Track';
+EXEC tSQLt.FakeTable 'dbo.InvoiceLine';
+EXEC tSQLt.FakeTable 'dbo.Invoice';
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) 
+VALUES (123, 'Under The Moon of Love', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) 
+VALUES (234, 123, 888.88);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) 
+VALUES (234, 456, '2016-05-02');
+
+SELECT * INTO Actual FROM dbo.GetTracksPurchasedByCustomer(<mark>457</mark>);
+
+EXEC tSQLt.AssertEmptyTable 'Actual';
+                        </code></pre>
+				<aside class="notes">
+					Common pattern in both software design and test design
+					<br/> (Willem van der Poel: Zero:One:Infinity)
+				</aside>
+			</section>
+			<section>
+				<h3>Testing 1, 2, 3 (or 0, 1,
+					<i>n</i> )</h3>
+				<pre class="stretch">
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE 
+GetTracksPurchasedByCustomer.[test no purchases returns empty result set] 
+AS
+EXEC tSQLt.FakeTable 'dbo.Track';
+EXEC tSQLt.FakeTable 'dbo.InvoiceLine';
+EXEC tSQLt.FakeTable 'dbo.Invoice';
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) 
+VALUES (123, 'Under The Moon of Love', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) 
+VALUES (234, 123, 888.88);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) 
+VALUES (234, 456, '2016-05-02');
+
+SELECT * INTO Actual FROM dbo.GetTracksPurchasedByCustomer(457);
+
+EXEC tSQLt.<mark>AssertEmptyTable</mark> 'Actual';
+                        </code></pre>
+				<aside class="notes">
+					Common pattern in both software design and test design
+					<br/> (Willem van der Poel: Zero:One:Infinity)
+				</aside>
+			</section>
+			<section>
+				<h3>Testing 1, 2, 3 (or 0, 1,
+					<i>n</i> )</h3>
+				<pre class="stretch">
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE 
 GetTracksPurchasedByCustomer.[test single purchase returns one row]
 AS
 EXEC tSQLt.FakeTable 'dbo.Track';
@@ -833,7 +1155,85 @@ EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';                        </code
 				<h3>Testing 1, 2, 3 (or 0, 1,
 					<i>n</i> )</h3>
 				<pre class="stretch">
-<code class="tsql" data-trim>CREATE PROCEDURE 
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE 
+GetTracksPurchasedByCustomer.[test single purchase returns one row]
+AS
+EXEC tSQLt.FakeTable 'dbo.Track';
+EXEC tSQLt.FakeTable 'dbo.InvoiceLine';
+EXEC tSQLt.FakeTable 'dbo.Invoice';
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) 
+    VALUES (123, 'Under The Moon of Love', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) 
+    VALUES (234, 123, 888.88);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) 
+    VALUES (234, <mark>456</mark>, '2016-05-02');
+
+SELECT * INTO Actual FROM dbo.GetTracksPurchasedByCustomer(<mark>456</mark>);
+SELECT * INTO Expected FROM (VALUES
+('Under The Moon of Love', CAST('2016-05-02' AS DATE), 888.88)) 
+AS t(TrackName, InvoiceDate, UnitPrice);
+
+EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';                        </code></pre>
+
+			</section>
+			<section>
+				<h3>Testing 1, 2, 3 (or 0, 1,
+					<i>n</i> )</h3>
+				<pre class="stretch">
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE 
+GetTracksPurchasedByCustomer.[test single purchase returns one row]
+AS
+EXEC tSQLt.FakeTable 'dbo.Track';
+EXEC tSQLt.FakeTable 'dbo.InvoiceLine';
+EXEC tSQLt.FakeTable 'dbo.Invoice';
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) 
+    VALUES (123, 'Under The Moon of Love', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) 
+    VALUES (234, 123, 888.88);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) 
+    VALUES (234, 456, '2016-05-02');
+
+SELECT * INTO Actual FROM dbo.GetTracksPurchasedByCustomer(456);
+<mark>SELECT * INTO Expected FROM (VALUES
+('Under The Moon of Love', CAST('2016-05-02' AS DATE), 888.88)) 
+AS t(TrackName, InvoiceDate, UnitPrice);</mark>
+
+EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';                        </code></pre>
+
+			</section>
+			<section>
+				<h3>Testing 1, 2, 3 (or 0, 1,
+					<i>n</i> )</h3>
+				<pre class="stretch">
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE 
+GetTracksPurchasedByCustomer.[test single purchase returns one row]
+AS
+EXEC tSQLt.FakeTable 'dbo.Track';
+EXEC tSQLt.FakeTable 'dbo.InvoiceLine';
+EXEC tSQLt.FakeTable 'dbo.Invoice';
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) 
+    VALUES (123, 'Under The Moon of Love', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) 
+    VALUES (234, 123, 888.88);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) 
+    VALUES (234, 456, '2016-05-02');
+
+SELECT * INTO Actual FROM dbo.GetTracksPurchasedByCustomer(456);
+SELECT * INTO Expected FROM (VALUES
+('Under The Moon of Love', CAST('2016-05-02' AS DATE), 888.88)) 
+AS t(TrackName, InvoiceDate, UnitPrice);
+
+<mark>EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';</mark>                        </code></pre>
+
+			</section>			
+			<section>
+				<h3>Testing 1, 2, 3 (or 0, 1,
+					<i>n</i> )</h3>
+				<pre class="stretch">
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE 
 GetTracksPurchasedByCustomer.[test separate purchases return separate rows]
 AS
 EXEC tSQLt.FakeTable 'dbo.Track';
@@ -867,13 +1267,165 @@ EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';
                       </code></pre>
 
 			</section>
+			<section>
+				<h3>Testing 1, 2, 3 (or 0, 1,
+					<i>n</i> )</h3>
+				<pre class="stretch">
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE 
+GetTracksPurchasedByCustomer.[test separate purchases return separate rows]
+AS
+EXEC tSQLt.FakeTable 'dbo.Track';
+EXEC tSQLt.FakeTable 'dbo.InvoiceLine';
+EXEC tSQLt.FakeTable 'dbo.Invoice';
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) 
+    VALUES (<mark>123</mark>, 'Under The Moon of Love', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) 
+    VALUES (234, 123, 888.88);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) 
+    VALUES (234, 456, '2016-05-02');
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) 
+    VALUES (<mark>789</mark>, 'Hey Rock and Roll', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) 
+    VALUES (567, 789, 777.77);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) 
+    VALUES (567, 456, '2016-05-02');
+
+
+SELECT * INTO Actual FROM dbo.GetTracksPurchasedByCustomer(456);
+SELECT * INTO Expected FROM (VALUES
+('Under The Moon of Love', CAST('2016-05-02' AS DATE), 888.88),
+('Hey Rock and Roll', CAST('2016-05-02' AS DATE), 777.77)
+
+) 
+AS t(TrackName, InvoiceDate, UnitPrice);
+
+EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';
+                      </code></pre>
+
+			</section>
+			<section>
+				<h3>Testing 1, 2, 3 (or 0, 1,
+					<i>n</i> )</h3>
+				<pre class="stretch">
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE 
+GetTracksPurchasedByCustomer.[test separate purchases return separate rows]
+AS
+EXEC tSQLt.FakeTable 'dbo.Track';
+EXEC tSQLt.FakeTable 'dbo.InvoiceLine';
+EXEC tSQLt.FakeTable 'dbo.Invoice';
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) 
+    VALUES (<mark>123</mark>, 'Under The Moon of Love', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) 
+    VALUES (234, 123, 888.88);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) 
+    VALUES (<mark>234</mark>, 456, '2016-05-02');
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) 
+    VALUES (<mark>789</mark>, 'Hey Rock and Roll', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) 
+    VALUES (567, 789, 777.77);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) 
+    VALUES (<mark>567</mark>, 456, '2016-05-02');
+
+
+SELECT * INTO Actual FROM dbo.GetTracksPurchasedByCustomer(456);
+SELECT * INTO Expected FROM (VALUES
+('Under The Moon of Love', CAST('2016-05-02' AS DATE), 888.88),
+('Hey Rock and Roll', CAST('2016-05-02' AS DATE), 777.77)
+
+) 
+AS t(TrackName, InvoiceDate, UnitPrice);
+
+EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';
+                      </code></pre>
+
+			</section>
+			<section>
+				<h3>Testing 1, 2, 3 (or 0, 1,
+					<i>n</i> )</h3>
+				<pre class="stretch">
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE 
+GetTracksPurchasedByCustomer.[test separate purchases return separate rows]
+AS
+EXEC tSQLt.FakeTable 'dbo.Track';
+EXEC tSQLt.FakeTable 'dbo.InvoiceLine';
+EXEC tSQLt.FakeTable 'dbo.Invoice';
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) 
+    VALUES (<mark>123</mark>, 'Under The Moon of Love', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) 
+    VALUES (234, 123, 888.88);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) 
+    VALUES (<mark>234</mark>, <mark>456</mark>, '2016-05-02');
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) 
+    VALUES (<mark>789</mark>, 'Hey Rock and Roll', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) 
+    VALUES (567, 789, 777.77);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) 
+    VALUES (<mark>567</mark>, <mark>456</mark>, '2016-05-02');
+
+
+SELECT * INTO Actual FROM dbo.GetTracksPurchasedByCustomer(456);
+SELECT * INTO Expected FROM (VALUES
+('Under The Moon of Love', CAST('2016-05-02' AS DATE), 888.88),
+('Hey Rock and Roll', CAST('2016-05-02' AS DATE), 777.77)
+
+) 
+AS t(TrackName, InvoiceDate, UnitPrice);
+
+EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';
+                      </code></pre>
+
+			</section>
+			<section>
+				<h3>Testing 1, 2, 3 (or 0, 1,
+					<i>n</i> )</h3>
+				<pre class="stretch">
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE 
+GetTracksPurchasedByCustomer.[test separate purchases return separate rows]
+AS
+EXEC tSQLt.FakeTable 'dbo.Track';
+EXEC tSQLt.FakeTable 'dbo.InvoiceLine';
+EXEC tSQLt.FakeTable 'dbo.Invoice';
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) 
+    VALUES (123, 'Under The Moon of Love', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) 
+    VALUES (234, 123, 888.88);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) 
+    VALUES (234, 456, '2016-05-02');
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) 
+    VALUES (789, 'Hey Rock and Roll', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) 
+    VALUES (567, 789, 777.77);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) 
+    VALUES (567, 456, '2016-05-02');
+
+
+SELECT * INTO Actual FROM dbo.GetTracksPurchasedByCustomer(456);
+<mark>SELECT * INTO Expected FROM (VALUES
+('Under The Moon of Love', CAST('2016-05-02' AS DATE), 888.88),
+('Hey Rock and Roll', CAST('2016-05-02' AS DATE), 777.77)
+
+) </mark>
+AS t(TrackName, InvoiceDate, UnitPrice);
+
+EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';
+                      </code></pre>
+
+			</section>
 
 			<section>
 				<h3>Test Setup Procedure</h3>
 				<p>Called before
 					<i>every</i> test</p>
 				<pre class="stretch">
-<code class="tsql">CREATE PROCEDURE GetTracksPurchasedByCustomer.Setup
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE GetTracksPurchasedByCustomer.Setup
 AS
 EXEC tSQLt.FakeTable 'dbo.Track';
 EXEC tSQLt.FakeTable 'dbo.InvoiceLine';
@@ -893,11 +1445,110 @@ INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) VALUES (678, 456, '2
 
 			</section>
 			<section>
+					<h3>Test Setup Procedure</h3>
+					<p>Called before
+						<i>every</i> test</p>
+					<pre class="stretch">
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE <mark>GetTracksPurchasedByCustomer</mark>.Setup
+AS
+EXEC tSQLt.FakeTable 'dbo.Track';
+EXEC tSQLt.FakeTable 'dbo.InvoiceLine';
+EXEC tSQLt.FakeTable 'dbo.Invoice';
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) VALUES (123, 'Dancin'' Party', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) VALUES (234, 123, 666.66);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) VALUES (234, 457, '2016-05-02');
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) VALUES (789, 'Hey Rock and Roll', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) VALUES (567, 789, 777.77);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) VALUES (567, 457, '2016-05-02');
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) VALUES (432, 'Under The Moon of Love', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) VALUES (678, 432, 888.88);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) VALUES (678, 456, '2016-05-02');
+</code></pre>
+
+			</section>
+		<section>
+				<h3>Test Setup Procedure</h3>
+				<p>Called before
+					<i>every</i> test</p>
+				<pre class="stretch">
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE GetTracksPurchasedByCustomer.<mark>Setup</mark>
+AS
+EXEC tSQLt.FakeTable 'dbo.Track';
+EXEC tSQLt.FakeTable 'dbo.InvoiceLine';
+EXEC tSQLt.FakeTable 'dbo.Invoice';
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) VALUES (123, 'Dancin'' Party', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) VALUES (234, 123, 666.66);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) VALUES (234, 457, '2016-05-02');
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) VALUES (789, 'Hey Rock and Roll', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) VALUES (567, 789, 777.77);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) VALUES (567, 457, '2016-05-02');
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) VALUES (432, 'Under The Moon of Love', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) VALUES (678, 432, 888.88);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) VALUES (678, 456, '2016-05-02');
+</code></pre>
+
+			</section>
+			<section>
+					<h3>Test Setup Procedure</h3>
+					<p>Called before
+						<i>every</i> test</p>
+				<pre class="stretch">
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE GetTracksPurchasedByCustomer.Setup
+AS
+<mark>EXEC tSQLt.FakeTable 'dbo.Track';
+EXEC tSQLt.FakeTable 'dbo.InvoiceLine';
+EXEC tSQLt.FakeTable 'dbo.Invoice';</mark>
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) VALUES (123, 'Dancin'' Party', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) VALUES (234, 123, 666.66);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) VALUES (234, 457, '2016-05-02');
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) VALUES (789, 'Hey Rock and Roll', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) VALUES (567, 789, 777.77);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) VALUES (567, 457, '2016-05-02');
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) VALUES (432, 'Under The Moon of Love', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) VALUES (678, 432, 888.88);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) VALUES (678, 456, '2016-05-02')
+</code></pre>
+	</section>
+	<section>
+			<h3>Test Setup Procedure</h3>
+			<p>Called before
+				<i>every</i> test</p>
+		<pre class="stretch">
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE GetTracksPurchasedByCustomer.Setup
+AS
+EXEC tSQLt.FakeTable 'dbo.Track';
+EXEC tSQLt.FakeTable 'dbo.InvoiceLine';
+EXEC tSQLt.FakeTable 'dbo.Invoice';
+
+<mark>INSERT INTO dbo.Track (TrackId, Name, UnitPrice) VALUES (123, 'Dancin'' Party', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) VALUES (234, 123, 666.66);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) VALUES (234, 457, '2016-05-02');
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) VALUES (789, 'Hey Rock and Roll', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) VALUES (567, 789, 777.77);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) VALUES (567, 457, '2016-05-02');
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) VALUES (432, 'Under The Moon of Love', 999.99);
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) VALUES (678, 432, 888.88);
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) VALUES (678, 456, '2016-05-02')</mark>
+</code></pre>
+</section>
+							
+			<section>
 				<h3>Test using setup procedure</h3>
 				<pre class="stretch">
 <code class="tsql">CREATE PROCEDURE GetTracksPurchasedByCustomer.[test separate purchases return separate rows]
 AS
-
+--??? 
 
 --Act
 SELECT * INTO Actual FROM dbo.GetTracksPurchasedByCustomer(457);
@@ -1266,7 +1917,7 @@ EXEC tSQLt.AssertEquals 0, @executionCount;
 				<pre><code class="tsql">EXEC xp_logevent 50234, 'I''m a pointless log message'
     </code></pre>
 
-				<pre><code class="tsql, fragment" data-trim>CREATE PROCEDURE DoPointlessLogging
+				<pre><code class="tsql fragment" data-trim>CREATE PROCEDURE DoPointlessLogging
 AS
 BEGIN
 EXEC xp_logevent 50234, 'I''m a pointless log message'
