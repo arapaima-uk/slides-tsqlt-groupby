@@ -1444,7 +1444,7 @@ INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) VALUES (678, 432, 888
 INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) VALUES (678, 456, '2016-05-02');</code></pre>
 
 			</section>
-			<section>
+<section>
 					<h3>Test Setup Procedure</h3>
 					<p>Called before
 						<i>every</i> test</p>
@@ -1468,7 +1468,7 @@ INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) VALUES (678, 432, 888
 INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) VALUES (678, 456, '2016-05-02');
 </code></pre>
 
-			</section>
+</section>
 		<section>
 				<h3>Test Setup Procedure</h3>
 				<p>Called before
@@ -1543,10 +1543,10 @@ INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) VALUES (678, 456, '2
 </code></pre>
 </section>
 							
-			<section>
+<section>
 				<h3>Test using setup procedure</h3>
 				<pre class="stretch">
-<code class="tsql">CREATE PROCEDURE GetTracksPurchasedByCustomer.[test separate purchases return separate rows]
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE GetTracksPurchasedByCustomer.[test separate purchases return separate rows]
 AS
 --??? 
 
@@ -1564,11 +1564,33 @@ AS t(TrackName, InvoiceDate, UnitPrice);
 EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';
                 </code></pre>
 			</section>
-			<section>
+		<section>
+				<h3>Test using setup procedure</h3>
+				<pre class="stretch">
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE GetTracksPurchasedByCustomer.[test separate purchases return separate rows]
+AS
+<mark>--??? </mark>
+
+--Act
+SELECT * INTO Actual FROM dbo.GetTracksPurchasedByCustomer(457);
+
+--Assert
+SELECT * INTO Expected FROM (VALUES
+('Dancin'' Party', CAST('2016-05-02' AS DATE), 666.66),
+('Hey Rock and Roll', CAST('2016-05-02' AS DATE), 777.77)
+
+) 
+AS t(TrackName, InvoiceDate, UnitPrice);
+
+EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';
+				</code></pre>
+			</section>
+	
+<section>
 				<h3>A better way</h3>
 				<pre class="stretch">
-<code class="tsql">CREATE PROCEDURE 
-GetTracksPurchasedByCustomer.[Fake Track, Invoice, and Invoice Line]
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE 
+<mark>GetTracksPurchasedByCustomer</mark>.[Fake Track, Invoice, and Invoice Line]
 AS
 EXEC tSQLt.FakeTable 'dbo.Track';
 EXEC tSQLt.FakeTable 'dbo.InvoiceLine';
@@ -1576,16 +1598,71 @@ EXEC tSQLt.FakeTable 'dbo.Invoice';
 </code></pre>
 
 			</section>
+		<section>
+				<h3>A better way</h3>
+				<pre class="stretch">
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE 
+GetTracksPurchasedByCustomer.[<mark>Fake Track, Invoice, and Invoice Line</mark>]
+AS
+EXEC tSQLt.FakeTable 'dbo.Track';
+EXEC tSQLt.FakeTable 'dbo.InvoiceLine';
+EXEC tSQLt.FakeTable 'dbo.Invoice';
+</code></pre>
+
+			</section>
+		<section>
+				<h3>A better way</h3>
+				<pre class="stretch">
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE 
+GetTracksPurchasedByCustomer.[Fake Track, Invoice, and Invoice Line]
+AS
+<mark>EXEC tSQLt.FakeTable 'dbo.Track';
+EXEC tSQLt.FakeTable 'dbo.InvoiceLine';
+EXEC tSQLt.FakeTable 'dbo.Invoice';</mark>
+</code></pre>
+
+			</section>
+
+	
 			<section>
 				<h3>A Test Data Builder</h3>
 				<pre class="stretch">
-<code class="tsql">CREATE PROCEDURE 
-GetTracksPurchasedByCustomer.[Create Invoice For One Track] 
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE 
+GetTracksPurchasedByCustomer.[Create Invoice For One Track]
 @TrackName nvarchar(200) = NULL, @TrackPrice numeric(10, 2) = NULL,
 @InvoiceLinePrice numeric(10, 2) = NULL, @InvoiceDate date = NULL, 
 @Composer nvarchar(220) = NULL, @Quantity int = NULL,
---blah blah more params, all NULL
+--blah blah more params, all defaulted to NULL
+
 @CustomerID INT OUTPUT
+
+AS
+DECLARE @TrackID INT = ABS(Checksum(NewID()) % 1000);
+DECLARE @InvoiceID INT = ABS(Checksum(NewID()) % 1000);
+SET @CustomerID  = ABS(Checksum(NewID()) % 1000);
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) 
+VALUES (@TrackID, @TrackName, @TrackPrice);
+
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) 
+VALUES (@InvoiceID, @TrackID, @InvoiceLinePrice);
+
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) 
+VALUES (@InvoiceID, @CustomerID, @InvoiceDate);
+</code></pre>
+		</section>
+		<section>
+				<h3>A Test Data Builder</h3>
+				<pre class="stretch">
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE 
+<mark>GetTracksPurchasedByCustomer.[Create Invoice For One Track] </mark>
+@TrackName nvarchar(200) = NULL, @TrackPrice numeric(10, 2) = NULL,
+@InvoiceLinePrice numeric(10, 2) = NULL, @InvoiceDate date = NULL, 
+@Composer nvarchar(220) = NULL, @Quantity int = NULL,
+--blah blah more params, all defaulted to NULL
+
+@CustomerID INT OUTPUT
+
 AS
 DECLARE @TrackID INT = ABS(Checksum(NewID()) % 1000);
 DECLARE @InvoiceID INT = ABS(Checksum(NewID()) % 1000);
@@ -1602,10 +1679,96 @@ VALUES (@InvoiceID, @CustomerID, @InvoiceDate);
 </code></pre>
 
 			</section>
-			<section>
-				<h3>The revised test</h3>
+		<section>
+				<h3>A Test Data Builder</h3>
 				<pre class="stretch">
-<code class="tsql">CREATE PROCEDURE GetTracksPurchasedByCustomer.[test single purchase returns one row]
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE 
+GetTracksPurchasedByCustomer.[Create Invoice For One Track] 
+<mark>@TrackName nvarchar(200) = NULL, @TrackPrice numeric(10, 2) = NULL,
+@InvoiceLinePrice numeric(10, 2) = NULL, @InvoiceDate date = NULL, 
+@Composer nvarchar(220) = NULL, @Quantity int = NULL,
+--blah blah more params, all defaulted to NULL</mark>
+
+@CustomerID INT OUTPUT
+
+AS
+DECLARE @TrackID INT = ABS(Checksum(NewID()) % 1000);
+DECLARE @InvoiceID INT = ABS(Checksum(NewID()) % 1000);
+SET @CustomerID  = ABS(Checksum(NewID()) % 1000);
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) 
+VALUES (@TrackID, @TrackName, @TrackPrice);
+
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) 
+VALUES (@InvoiceID, @TrackID, @InvoiceLinePrice);
+
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) 
+VALUES (@InvoiceID, @CustomerID, @InvoiceDate);
+</code></pre>
+
+		</section>
+		<section>
+				<h3>A Test Data Builder</h3>
+				<pre class="stretch">
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE 
+GetTracksPurchasedByCustomer.[Create Invoice For One Track] 
+@TrackName nvarchar(200) = NULL, @TrackPrice numeric(10, 2) = NULL,
+@InvoiceLinePrice numeric(10, 2) = NULL, @InvoiceDate date = NULL, 
+@Composer nvarchar(220) = NULL, @Quantity int = NULL,
+--blah blah more params, all defaulted to NULL
+
+<mark>@CustomerID INT OUTPUT</mark>
+
+AS
+DECLARE @TrackID INT = ABS(Checksum(NewID()) % 1000);
+DECLARE @InvoiceID INT = ABS(Checksum(NewID()) % 1000);
+SET @CustomerID  = ABS(Checksum(NewID()) % 1000);
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) 
+VALUES (@TrackID, @TrackName, @TrackPrice);
+
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) 
+VALUES (@InvoiceID, @TrackID, @InvoiceLinePrice);
+
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) 
+VALUES (@InvoiceID, @CustomerID, @InvoiceDate);
+</code></pre>
+
+			</section>
+		<section>
+				<h3>A Test Data Builder</h3>
+				<pre class="stretch">
+<code class="tsql" data-trim data-noescape>CREATE PROCEDURE 
+GetTracksPurchasedByCustomer.[Create Invoice For One Track] 
+@TrackName nvarchar(200) = NULL, @TrackPrice numeric(10, 2) = NULL,
+@InvoiceLinePrice numeric(10, 2) = NULL, @InvoiceDate date = NULL, 
+@Composer nvarchar(220) = NULL, @Quantity int = NULL,
+--blah blah more params, all defaulted to NULL
+
+<mark>@CustomerID INT OUTPUT</mark>
+
+AS
+DECLARE @TrackID INT = ABS(Checksum(NewID()) % 1000);
+DECLARE @InvoiceID INT = ABS(Checksum(NewID()) % 1000);
+<mark>SET @CustomerID  = ABS(Checksum(NewID()) % 1000);</mark>
+
+INSERT INTO dbo.Track (TrackId, Name, UnitPrice) 
+VALUES (@TrackID, @TrackName, @TrackPrice);
+
+INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice) 
+VALUES (@InvoiceID, @TrackID, @InvoiceLinePrice);
+
+INSERT INTO dbo.Invoice(InvoiceId, CustomerId, InvoiceDate) 
+VALUES (@InvoiceID, @CustomerID, @InvoiceDate);
+</code></pre>
+
+			</section>
+
+<section>
+		<h3>The revised test</h3>
+				<pre class="stretch">
+<code class="tsql" data-trim data-noescape>
+CREATE PROCEDURE GetTracksPurchasedByCustomer.[test single purchase returns one row]
 AS
 --Arrange
 EXEC GetTracksPurchasedByCustomer.[Fake Track, Invoice, and Invoice Line]
@@ -1628,6 +1791,33 @@ EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';
 </code></pre>
 
 			</section>
+<section>
+		<h3>The revised test</h3>
+				<pre class="stretch">
+<code class="tsql" data-trim data-noescape>
+CREATE PROCEDURE GetTracksPurchasedByCustomer.[test single purchase returns one row]
+AS
+--Arrange
+EXEC GetTracksPurchasedByCustomer.<mark>[Fake Track, Invoice, and Invoice Line]</mark>
+DECLARE @CustomerID int;
+EXEC GetTracksPurchasedByCustomer.<mark>[Create Invoice For One Track] 
+	@TrackName = 'Under The Moon of Love',
+	@InvoiceDate = '2016-05-02', 
+	@InvoiceLinePrice = '888.88',
+	@CustomerId = @CustomerId OUTPUT;</mark>
+--Act
+SELECT * INTO Actual 
+FROM dbo.GetTracksPurchasedByCustomer(@CustomerId);
+--Assert
+SELECT * INTO Expected FROM (VALUES
+('Under The Moon of Love', CAST('2016-05-02' AS DATE), 888.88)) 
+AS t(TrackName, InvoiceDate, UnitPrice);
+
+EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';
+
+</code></pre>
+
+			</section>
 			<section>
 
 				<h3>Use helper procedures and data builders, not setup procedures</h3>
@@ -1635,6 +1825,7 @@ EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';
 			</section>
 
 			<section>
+				<h3>Dating disasters...</h3>
 				<p>Table
 					<code>dbo.PlayListTrack</code>
 				</p>
@@ -1655,7 +1846,8 @@ EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';
 					</tbody>
 				</table>
 				<pre class="stretch">
-<code class="tsql">CREATE PROCEDURE AddTrackToPlaylist @TrackID INT, @PlaylistID INT
+<code class="tsql" data-trim data-noescape>
+CREATE PROCEDURE AddTrackToPlaylist @TrackID INT, @PlaylistID INT
 AS
 MERGE dbo.PlaylistTrack as t
 
@@ -1673,7 +1865,8 @@ WHEN MATCHED THEN UPDATE SET DateAdded = SYSUTCDATETIME();</code></pre>
 			<section>
 				<h4>What goes in the ???</h4>
 				<pre class="stretch">
-<code class="tsql">CREATE PROCEDURE 
+<code class="tsql" data-trim data-noescape>
+CREATE PROCEDURE 
 AddTrackToPlaylist[test valid track and playlist inserted]
 AS
 --Arrange
@@ -1684,7 +1877,7 @@ EXEC AddTrackToPlaylist @TrackId = 66, @PlayListId = 67;
 
 --Assert
 SELECT * INTO Expected 
-    FROM (VALUES(67, 66, '???')) as 
+    FROM (VALUES(67, 66, <mark>'???'</mark>)) as 
     t(PlaylistID, TrackID, DateAdded);
 
 SELECT PlayListID, TrackID, DateAdded into Actual 
@@ -1697,7 +1890,8 @@ EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';</code></pre>
 			<section>
 				<h4>The quick solution</h4>
 				<pre class="stretch">
-<code class="tsql">CREATE PROCEDURE 
+<code class="tsql" data-trim data-noescape>
+CREATE PROCEDURE 
 AddTrackToPlaylist[test valid track and playlist inserted]
 AS
 --Arrange
@@ -1708,20 +1902,21 @@ EXEC AddTrackToPlaylist @TrackId = 66, @PlayListId = 67;
 
 --Assert
 SELECT * INTO Expected FROM 
-    (VALUES(67, 66, CAST(SYSUTCDATETIME() AS Date))) as 
+    (VALUES(67, 66, <mark>CAST(SYSUTCDATETIME() AS Date))</mark>) as 
         t(PlaylistID, TrackID, DateAdded);
-SELECT PlayListID, TrackID, CAST(DateAdded AS Date) as DateAdded 
+SELECT PlayListID, TrackID, <mark>CAST(DateAdded AS Date)</mark> as DateAdded 
     into Actual from dbo.PlaylistTrack;
 
 EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';</code></pre>
 
 
 			</section>
-			<section>
+<section>
 				<h4>Refactoring the procedure</h4>
 				<pre class="stretch">
-<code class="tsql">CREATE PROCEDURE AddTrackToPlaylist @TrackID INT, @PlaylistID INT, 
-    @DateAdded datetime2 = NULL
+<code class="tsql" data-trim data-noescape>
+CREATE PROCEDURE AddTrackToPlaylist @TrackID INT, @PlaylistID INT, 
+<mark>@DateAdded datetime2 = NULL</mark>
 AS
 
 SET @DateAdded = ISNULL(@DateAdded, SYSUTCDATETIME());
@@ -1731,12 +1926,55 @@ USING (VALUES (@TrackID, @PlaylistID)) as s(TrackID, PlaylistID)
 ON t.TrackID = s.TrackID AND t.PlaylistID = s.PlaylistID
 
 WHEN NOT MATCHED THEN INSERT (PlaylistID, TrackID, DateAdded) 
-    VALUES (s.PlaylistID, s.TrackID, @DateAdded)
+    	VALUES (s.PlaylistID, s.TrackID, @DateAdded)
 
 WHEN MATCHED THEN UPDATE SET DateAdded = @DateAdded;</code></pre>
 
 
 			</section>
+		<section>
+				<h4>Refactoring the procedure</h4>
+				<pre class="stretch">
+<code class="tsql" data-trim data-noescape>
+CREATE PROCEDURE AddTrackToPlaylist @TrackID INT, @PlaylistID INT, 
+<mark>@DateAdded datetime2 = NULL</mark>
+AS
+
+<mark>SET @DateAdded = ISNULL(@DateAdded, SYSUTCDATETIME());</mark>
+
+MERGE dbo.PlaylistTrack as t
+USING (VALUES (@TrackID, @PlaylistID)) as s(TrackID, PlaylistID)
+ON t.TrackID = s.TrackID AND t.PlaylistID = s.PlaylistID
+
+WHEN NOT MATCHED THEN INSERT (PlaylistID, TrackID, DateAdded) 
+	VALUES (s.PlaylistID, s.TrackID, @DateAdded)
+
+WHEN MATCHED THEN UPDATE SET DateAdded = @DateAdded;</code></pre>
+
+
+			</section>
+		<section>
+				<h4>Refactoring the procedure</h4>
+				<pre class="stretch">
+<code class="tsql" data-trim data-noescape>
+CREATE PROCEDURE AddTrackToPlaylist @TrackID INT, @PlaylistID INT, 
+<mark>@DateAdded datetime2 = NULL</mark>
+AS
+
+<mark>SET @DateAdded = ISNULL(@DateAdded, SYSUTCDATETIME());</mark>
+
+MERGE dbo.PlaylistTrack as t
+USING (VALUES (@TrackID, @PlaylistID)) as s(TrackID, PlaylistID)
+ON t.TrackID = s.TrackID AND t.PlaylistID = s.PlaylistID
+
+WHEN NOT MATCHED THEN INSERT (PlaylistID, TrackID, DateAdded) 
+	VALUES (s.PlaylistID, s.TrackID, <mark>@DateAdded</mark>)
+
+WHEN MATCHED THEN UPDATE SET DateAdded = <mark>@DateAdded</mark>;</code></pre>
+
+
+			</section>
+						
 			<section>
 				<h4>The updated test</h4>
 				<pre class="stretch">
@@ -1766,7 +2004,8 @@ EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';</code></pre>
 			<section>
 				<h4>The eierlegende Wollmilchsau</h4>
 				<pre class="stretch">
-<code class="tsql">CREATE PROCEDURE DoAllTheThings @DayOfWeek varchar(10)
+<code class="tsql" data-trim data-noescape>
+CREATE PROCEDURE DoAllTheThings @DayOfWeek varchar(10)
 AS
 --Runs every night to perform various tasks
 BEGIN
@@ -1823,11 +2062,70 @@ END
 END</code></pre>
 			</section>
 			<section>
-				<h3>Mock All the Things</h3>
-				<pre class="stretch"><code class="tsql">
- CREATE PROCEDURE DoAllTheThings.[Mock All the Things]   
- AS
+					<h4>The eierlegende Wollmilchsau</h4>
+					<pre class="stretch">
+<code class="tsql" data-trim data-noescape>
+CREATE PROCEDURE DoAllTheThings @DayOfWeek varchar(10)
+AS
+<mark>--Runs every night to perform various tasks</mark>
+BEGIN
+IF (@DayOfWeek = 'Monday')
+BEGIN
+	DELETE FROM Genre WHERE NOT EXISTS
+	(SELECT * FROM Track WHERE Track.GenreId = Genre.GenreId)
 
+END
+
+ELSE IF (@DayOfWeek = 'Wednesday')
+BEGIN
+	UPDATE Track SET UnitPrice = UnitPrice * 1.01;
+	UPDATE Customer SET PostalCode = GetPostalCodeFromExernalService(Address)
+	WHERE PostalCode IS NULL;
+END
+ELSE IF (@DayOfWeek = 'Thursday')
+BEGIN
+	;WITH Sales as(
+	SELECT Artist.ArtistID, Artist.Name, COUNT(InvoiceLineID) as Sales
+	FROM InvoiceLine JOIN Track ON InvoiceLine.TrackID = Track.TrackId
+	Join Album ON Track.AlbumId = Album.AlbumID
+	JOIN Artist ON Album.ArtistId = Artist.ArtistId
+	GROUP BY Artist.ArtistID, Artist.Name),
+	SalesRank as 
+
+	(SELECT ArtistId, Name,  Row_Number() over (order by sales desc) as Popularity FROM Sales
+	)
+
+	UPDATE Artist SET Popularity = (select popularity from SalesRank where SalesRank.ArtistId = rtist.ArtistId)
+END
+
+ELSE IF (@DayOfWeek = 'Friday')
+BEGIN
+	DECLARE c CURSOR for
+	SELECT Email FROM Employee
+	 WHERE (DATEDIFF(dd, getdate(), DATEADD(yyyy, DATEDIFF(yyyy, birthdate, getdate()) + 1, irthdate))) % 366 <= 7
+	 DECLARE @email varchar(60)
+	 open c
+	 FETCH NEXT FROM c INTO @email
+	 WHILE @@FETCH_STATUS = 0
+	 BEGIN
+		EXEC msdb..sp_send_dbmail @recipients = @email, @subject = 'Birthday Greetings', @body = 'Happy Birthday for next week'
+		FETCH NEXT FROM c INTO @email
+	 END
+	 CLOSE c
+	 DEALLOCATE c
+END
+
+ELSE
+BEGIN
+	EXEC xp_logevent 50234, 'I''m a pointless log message'
+END
+END</code></pre>
+			</section>
+
+<section>
+<h3>Mock All the Things</h3>
+<pre class="stretch"><code class="tsql">
+CREATE PROCEDURE DoAllTheThings.[Mock All the Things]   
 EXEC tSQLT.FakeTable 'Genre';
 EXEC tSQLT.FakeTable 'Track';
 EXEC tSQLT.FakeTable 'Employee';
@@ -1870,7 +2168,135 @@ END
 END
     </code></pre>
 
-			</section>
+</section>
+<section>
+		<h3>Saving time by testing more than one thing at once</h3>
+		<pre class="stretch"><code class="tsql" data-noescape data-trim>
+CREATE PROCEDURE DoAllTheThings.[test on Mondays we delete empty genres and update artist rankings but don't increase prices or update missing postcodes]
+AS
+EXEC tSQLt.SpyProcedure 'DeleteEmptyGenres';
+EXEC tSQLt.SpyProcedure 'UpdateArtistRankings';
+EXEC tSQLt.SpyProcedure 'IncreasePrices';
+EXEC tSQLt.SpyProcedure 'UpdateMissingPostcodes';
+
+
+EXEC DoAllTheThings 'Monday';
+
+
+DECLARE @executionCountDeleteEmptyGenres int = 
+(select COUNT(*) from DeleteEmptyGenres_SpyProcedureLog);
+
+DECLARE @executionCountUpdateArtistRankings int = 
+(select COUNT(*) from UpdateArtistRankings_SpyProcedureLog);
+
+DECLARE @executionCountIncreasePrices int = 
+(select COUNT(*) from IncreasePrices_SpyProcedureLog);
+
+DECLARE @executionCountUpdateMissingPostcodes int = 
+(select COUNT(*) from UpdateMissingPostcodes_SpyProcedureLog);
+
+EXEC tSQLt.AssertEquals 1, @executionCountDeleteEmptyGenres;
+EXEC tSQLt.AssertEquals 1, @executionCountUpdateArtistRankings;
+EXEC tSQLt.AssertEquals 0, @executionCountIncreasePrices;
+EXEC tSQLt.AssertEquals 0, @executionCountUpdateMissingPostcodes;
+</code></pre>
+	</section>
+	<section>
+			<h3>Saving time by testing more than one thing at once</h3>
+			<pre class="stretch"><code class="tsql" data-noescape data-trim>
+CREATE PROCEDURE DoAllTheThings.[test on Mondays we delete empty genres <mark>and</mark> update artist rankings <mark>but</mark> don't increase prices or update missing postcodes]
+AS
+EXEC tSQLt.SpyProcedure 'DeleteEmptyGenres';
+EXEC tSQLt.SpyProcedure 'UpdateArtistRankings';
+EXEC tSQLt.SpyProcedure 'IncreasePrices';
+EXEC tSQLt.SpyProcedure 'UpdateMissingPostcodes';
+
+
+EXEC DoAllTheThings 'Monday';
+
+
+DECLARE @executionCountDeleteEmptyGenres int = 
+(select COUNT(*) from DeleteEmptyGenres_SpyProcedureLog);
+
+DECLARE @executionCountUpdateArtistRankings int = 
+(select COUNT(*) from UpdateArtistRankings_SpyProcedureLog);
+
+DECLARE @executionCountIncreasePrices int = 
+(select COUNT(*) from IncreasePrices_SpyProcedureLog);
+
+DECLARE @executionCountUpdateMissingPostcodes int = 
+(select COUNT(*) from UpdateMissingPostcodes_SpyProcedureLog);
+
+EXEC tSQLt.AssertEquals 1, @executionCountDeleteEmptyGenres;
+EXEC tSQLt.AssertEquals 1, @executionCountUpdateArtistRankings;
+EXEC tSQLt.AssertEquals 0, @executionCountIncreasePrices;
+EXEC tSQLt.AssertEquals 0, @executionCountUpdateMissingPostcodes;
+</code></pre>
+		</section>
+		<section>
+				<h3>Saving time by testing more than one thing at once</h3>
+		<pre class="stretch"><code class="tsql" data-noescape data-trim>
+CREATE PROCEDURE DoAllTheThings.[test on Mondays we delete empty genres <mark>and</mark> update artist rankings <mark>but</mark> don't increase prices or update missing postcodes]
+AS
+EXEC tSQLt.SpyProcedure 'DeleteEmptyGenres';
+EXEC tSQLt.SpyProcedure 'UpdateArtistRankings';
+EXEC tSQLt.SpyProcedure 'IncreasePrices';
+EXEC tSQLt.SpyProcedure 'UpdateMissingPostcodes';
+
+
+EXEC DoAllTheThings 'Monday';
+
+
+DECLARE @executionCountDeleteEmptyGenres int = 
+(select COUNT(*) from DeleteEmptyGenres_SpyProcedureLog);
+
+DECLARE @executionCountUpdateArtistRankings int = 
+(select COUNT(*) from UpdateArtistRankings_SpyProcedureLog);
+
+DECLARE @executionCountIncreasePrices int = 
+(select COUNT(*) from IncreasePrices_SpyProcedureLog);
+
+DECLARE @executionCountUpdateMissingPostcodes int = 
+(select COUNT(*) from UpdateMissingPostcodes_SpyProcedureLog);
+
+EXEC tSQLt.<mark>Assert</mark>Equals 1, @executionCountDeleteEmptyGenres;
+EXEC tSQLt.<mark>Assert</mark>Equals 1, @executionCountUpdateArtistRankings;
+EXEC tSQLt.<mark>Assert</mark>Equals 0, @executionCountIncreasePrices;
+EXEC tSQLt.<mark>Assert</mark>Equals 0, @executionCountUpdateMissingPostcodes;
+</code></pre>
+	</section>
+			
+	<section>
+			<h3>Saving time by testing more than one thing at once</h3>
+			<pre class="stretch"><code class="tsql" data-noescape data-trim>
+CREATE PROCEDURE DoAllTheThings.[test on Mondays we delete empty genres and update artist rankings but don't increase prices or update missing postcodes]
+AS
+EXEC tSQLt.SpyProcedure 'DeleteEmptyGenres';
+EXEC tSQLt.SpyProcedure 'UpdateArtistRankings';
+EXEC tSQLt.SpyProcedure 'IncreasePrices';
+EXEC tSQLt.SpyProcedure 'UpdateMissingPostcodes';
+
+
+EXEC DoAllTheThings 'Monday';
+
+
+DECLARE @executionCountDeleteEmptyGenres int = 
+(select COUNT(*) from DeleteEmptyGenres_SpyProcedureLog);
+
+DECLARE @executionCountUpdateArtistRankings int = 
+(select COUNT(*) from UpdateArtistRankings_SpyProcedureLog);
+
+DECLARE @executionCountIncreasePrices int = 
+(select COUNT(*) from IncreasePrices_SpyProcedureLog);
+
+DECLARE @executionCountUpdateMissingPostcodes int = 
+(select COUNT(*) from UpdateMissingPostcodes_SpyProcedureLog);
+
+<mark>DECLARE @totalExecutionCount int = @executionCountDeleteEmptyGenres + @executionCountUpdateArtistRankings + 
+	@executionCountIncreasePrices + @executionCountUpdateMissingPostcodes 
+EXEC tSQLt.AssertEquals 2, @totalExecutionCount;</mark>
+	</code></pre>
+		</section>					
 			<section>
 				<h3>A specific Test</h3>
 				<pre class="stretch"><code class="tsql">CREATE PROCEDURE DoAllTheThings.[test On Thursday we update artist rankings]
@@ -1946,6 +2372,7 @@ EXEC tSQLt.AssertEquals 0, @executionCount;
     </code></pre>
 
 			</section>
+
 
 			<section>
 				<h3>Mocking the whole world is a sign that the procedure is doing too much</h3>
