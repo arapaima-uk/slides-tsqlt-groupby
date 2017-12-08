@@ -2226,135 +2226,7 @@ END
     </code></pre>
 
 </section>
-<section>
-		<h3>Saving time by testing more than one thing at once</h3>
-		<pre class="stretch"><code class="tsql" data-noescape data-trim>
-CREATE PROCEDURE DoAllTheThings.[test on Mondays we delete empty genres and update artist rankings but don't increase prices or update missing postcodes]
-AS
-EXEC tSQLt.SpyProcedure 'DeleteEmptyGenres';
-EXEC tSQLt.SpyProcedure 'UpdateArtistRankings';
-EXEC tSQLt.SpyProcedure 'IncreasePrices';
-EXEC tSQLt.SpyProcedure 'UpdateMissingPostcodes';
-
-
-EXEC DoAllTheThings 'Monday';
-
-
-DECLARE @executionCountDeleteEmptyGenres int = 
-(select COUNT(*) from DeleteEmptyGenres_SpyProcedureLog);
-
-DECLARE @executionCountUpdateArtistRankings int = 
-(select COUNT(*) from UpdateArtistRankings_SpyProcedureLog);
-
-DECLARE @executionCountIncreasePrices int = 
-(select COUNT(*) from IncreasePrices_SpyProcedureLog);
-
-DECLARE @executionCountUpdateMissingPostcodes int = 
-(select COUNT(*) from UpdateMissingPostcodes_SpyProcedureLog);
-
-EXEC tSQLt.AssertEquals 1, @executionCountDeleteEmptyGenres;
-EXEC tSQLt.AssertEquals 1, @executionCountUpdateArtistRankings;
-EXEC tSQLt.AssertEquals 0, @executionCountIncreasePrices;
-EXEC tSQLt.AssertEquals 0, @executionCountUpdateMissingPostcodes;
-</code></pre>
-	</section>
-	<section>
-			<h3>Saving time by testing more than one thing at once</h3>
-			<pre class="stretch"><code class="tsql" data-noescape data-trim>
-CREATE PROCEDURE DoAllTheThings.[test on Mondays we delete empty genres <mark>and</mark> update artist rankings <mark>but</mark> don't increase prices or update missing postcodes]
-AS
-EXEC tSQLt.SpyProcedure 'DeleteEmptyGenres';
-EXEC tSQLt.SpyProcedure 'UpdateArtistRankings';
-EXEC tSQLt.SpyProcedure 'IncreasePrices';
-EXEC tSQLt.SpyProcedure 'UpdateMissingPostcodes';
-
-
-EXEC DoAllTheThings 'Monday';
-
-
-DECLARE @executionCountDeleteEmptyGenres int = 
-(select COUNT(*) from DeleteEmptyGenres_SpyProcedureLog);
-
-DECLARE @executionCountUpdateArtistRankings int = 
-(select COUNT(*) from UpdateArtistRankings_SpyProcedureLog);
-
-DECLARE @executionCountIncreasePrices int = 
-(select COUNT(*) from IncreasePrices_SpyProcedureLog);
-
-DECLARE @executionCountUpdateMissingPostcodes int = 
-(select COUNT(*) from UpdateMissingPostcodes_SpyProcedureLog);
-
-EXEC tSQLt.AssertEquals 1, @executionCountDeleteEmptyGenres;
-EXEC tSQLt.AssertEquals 1, @executionCountUpdateArtistRankings;
-EXEC tSQLt.AssertEquals 0, @executionCountIncreasePrices;
-EXEC tSQLt.AssertEquals 0, @executionCountUpdateMissingPostcodes;
-</code></pre>
-		</section>
-		<section>
-				<h3>Saving time by testing more than one thing at once</h3>
-		<pre class="stretch"><code class="tsql" data-noescape data-trim>
-CREATE PROCEDURE DoAllTheThings.[test on Mondays we delete empty genres <mark>and</mark> update artist rankings <mark>but</mark> don't increase prices or update missing postcodes]
-AS
-EXEC tSQLt.SpyProcedure 'DeleteEmptyGenres';
-EXEC tSQLt.SpyProcedure 'UpdateArtistRankings';
-EXEC tSQLt.SpyProcedure 'IncreasePrices';
-EXEC tSQLt.SpyProcedure 'UpdateMissingPostcodes';
-
-
-EXEC DoAllTheThings 'Monday';
-
-
-DECLARE @executionCountDeleteEmptyGenres int = 
-(select COUNT(*) from DeleteEmptyGenres_SpyProcedureLog);
-
-DECLARE @executionCountUpdateArtistRankings int = 
-(select COUNT(*) from UpdateArtistRankings_SpyProcedureLog);
-
-DECLARE @executionCountIncreasePrices int = 
-(select COUNT(*) from IncreasePrices_SpyProcedureLog);
-
-DECLARE @executionCountUpdateMissingPostcodes int = 
-(select COUNT(*) from UpdateMissingPostcodes_SpyProcedureLog);
-
-EXEC tSQLt.<mark>Assert</mark>Equals 1, @executionCountDeleteEmptyGenres;
-EXEC tSQLt.<mark>Assert</mark>Equals 1, @executionCountUpdateArtistRankings;
-EXEC tSQLt.<mark>Assert</mark>Equals 0, @executionCountIncreasePrices;
-EXEC tSQLt.<mark>Assert</mark>Equals 0, @executionCountUpdateMissingPostcodes;
-</code></pre>
-	</section>
-			
-	<section>
-			<h3>Saving time by testing more than one thing at once</h3>
-			<pre class="stretch"><code class="tsql" data-noescape data-trim>
-CREATE PROCEDURE DoAllTheThings.[test on Mondays we delete empty genres and update artist rankings but don't increase prices or update missing postcodes]
-AS
-EXEC tSQLt.SpyProcedure 'DeleteEmptyGenres';
-EXEC tSQLt.SpyProcedure 'UpdateArtistRankings';
-EXEC tSQLt.SpyProcedure 'IncreasePrices';
-EXEC tSQLt.SpyProcedure 'UpdateMissingPostcodes';
-
-
-EXEC DoAllTheThings 'Monday';
-
-
-DECLARE @executionCountDeleteEmptyGenres int = 
-(select COUNT(*) from DeleteEmptyGenres_SpyProcedureLog);
-
-DECLARE @executionCountUpdateArtistRankings int = 
-(select COUNT(*) from UpdateArtistRankings_SpyProcedureLog);
-
-DECLARE @executionCountIncreasePrices int = 
-(select COUNT(*) from IncreasePrices_SpyProcedureLog);
-
-DECLARE @executionCountUpdateMissingPostcodes int = 
-(select COUNT(*) from UpdateMissingPostcodes_SpyProcedureLog);
-
-<mark>DECLARE @totalExecutionCount int = @executionCountDeleteEmptyGenres + @executionCountUpdateArtistRankings + 
-	@executionCountIncreasePrices + @executionCountUpdateMissingPostcodes 
-
-EXEC tSQLt.AssertEquals 2, @totalExecutionCount;</mark>
-	</code></pre>
-		</section>					
+				
 			<section>
 				<h3>A specific Test</h3>
 				<pre class="stretch"><code class="tsql">CREATE PROCEDURE DoAllTheThings.[test On Thursday we update artist rankings]
@@ -2396,6 +2268,136 @@ EXEC tSQLt.AssertEquals 0, @executionCount;
     </code></pre>
 
 			</section>
+
+			<section>
+					<h3>Saving time by testing more than one thing at once</h3>
+					<pre class="stretch"><code class="tsql" data-noescape data-trim>
+			CREATE PROCEDURE DoAllTheThings.[test on Mondays we delete empty genres and update artist rankings but don't increase prices or update missing postcodes]
+			AS
+			EXEC tSQLt.SpyProcedure 'DeleteEmptyGenres';
+			EXEC tSQLt.SpyProcedure 'UpdateArtistRankings';
+			EXEC tSQLt.SpyProcedure 'IncreasePrices';
+			EXEC tSQLt.SpyProcedure 'UpdateMissingPostcodes';
+			
+			
+			EXEC DoAllTheThings 'Monday';
+			
+			
+			DECLARE @executionCountDeleteEmptyGenres int = 
+			(select COUNT(*) from DeleteEmptyGenres_SpyProcedureLog);
+			
+			DECLARE @executionCountUpdateArtistRankings int = 
+			(select COUNT(*) from UpdateArtistRankings_SpyProcedureLog);
+			
+			DECLARE @executionCountIncreasePrices int = 
+			(select COUNT(*) from IncreasePrices_SpyProcedureLog);
+			
+			DECLARE @executionCountUpdateMissingPostcodes int = 
+			(select COUNT(*) from UpdateMissingPostcodes_SpyProcedureLog);
+			
+			EXEC tSQLt.AssertEquals 1, @executionCountDeleteEmptyGenres;
+			EXEC tSQLt.AssertEquals 1, @executionCountUpdateArtistRankings;
+			EXEC tSQLt.AssertEquals 0, @executionCountIncreasePrices;
+			EXEC tSQLt.AssertEquals 0, @executionCountUpdateMissingPostcodes;
+			</code></pre>
+				</section>
+				<section>
+						<h3>Saving time by testing more than one thing at once</h3>
+						<pre class="stretch"><code class="tsql" data-noescape data-trim>
+			CREATE PROCEDURE DoAllTheThings.[test on Mondays we delete empty genres <mark>and</mark> update artist rankings <mark>but</mark> don't increase prices or update missing postcodes]
+			AS
+			EXEC tSQLt.SpyProcedure 'DeleteEmptyGenres';
+			EXEC tSQLt.SpyProcedure 'UpdateArtistRankings';
+			EXEC tSQLt.SpyProcedure 'IncreasePrices';
+			EXEC tSQLt.SpyProcedure 'UpdateMissingPostcodes';
+			
+			
+			EXEC DoAllTheThings 'Monday';
+			
+			
+			DECLARE @executionCountDeleteEmptyGenres int = 
+			(select COUNT(*) from DeleteEmptyGenres_SpyProcedureLog);
+			
+			DECLARE @executionCountUpdateArtistRankings int = 
+			(select COUNT(*) from UpdateArtistRankings_SpyProcedureLog);
+			
+			DECLARE @executionCountIncreasePrices int = 
+			(select COUNT(*) from IncreasePrices_SpyProcedureLog);
+			
+			DECLARE @executionCountUpdateMissingPostcodes int = 
+			(select COUNT(*) from UpdateMissingPostcodes_SpyProcedureLog);
+			
+			EXEC tSQLt.AssertEquals 1, @executionCountDeleteEmptyGenres;
+			EXEC tSQLt.AssertEquals 1, @executionCountUpdateArtistRankings;
+			EXEC tSQLt.AssertEquals 0, @executionCountIncreasePrices;
+			EXEC tSQLt.AssertEquals 0, @executionCountUpdateMissingPostcodes;
+			</code></pre>
+					</section>
+					<section>
+							<h3>Saving time by testing more than one thing at once</h3>
+					<pre class="stretch"><code class="tsql" data-noescape data-trim>
+			CREATE PROCEDURE DoAllTheThings.[test on Mondays we delete empty genres <mark>and</mark> update artist rankings <mark>but</mark> don't increase prices or update missing postcodes]
+			AS
+			EXEC tSQLt.SpyProcedure 'DeleteEmptyGenres';
+			EXEC tSQLt.SpyProcedure 'UpdateArtistRankings';
+			EXEC tSQLt.SpyProcedure 'IncreasePrices';
+			EXEC tSQLt.SpyProcedure 'UpdateMissingPostcodes';
+			
+			
+			EXEC DoAllTheThings 'Monday';
+			
+			
+			DECLARE @executionCountDeleteEmptyGenres int = 
+			(select COUNT(*) from DeleteEmptyGenres_SpyProcedureLog);
+			
+			DECLARE @executionCountUpdateArtistRankings int = 
+			(select COUNT(*) from UpdateArtistRankings_SpyProcedureLog);
+			
+			DECLARE @executionCountIncreasePrices int = 
+			(select COUNT(*) from IncreasePrices_SpyProcedureLog);
+			
+			DECLARE @executionCountUpdateMissingPostcodes int = 
+			(select COUNT(*) from UpdateMissingPostcodes_SpyProcedureLog);
+			
+			EXEC tSQLt.<mark>Assert</mark>Equals 1, @executionCountDeleteEmptyGenres;
+			EXEC tSQLt.<mark>Assert</mark>Equals 1, @executionCountUpdateArtistRankings;
+			EXEC tSQLt.<mark>Assert</mark>Equals 0, @executionCountIncreasePrices;
+			EXEC tSQLt.<mark>Assert</mark>Equals 0, @executionCountUpdateMissingPostcodes;
+			</code></pre>
+				</section>
+						
+				<section>
+						<h3>Saving time by testing more than one thing at once</h3>
+						<pre class="stretch"><code class="tsql" data-noescape data-trim>
+			CREATE PROCEDURE DoAllTheThings.[test on Mondays we delete empty genres and update artist rankings but don't increase prices or update missing postcodes]
+			AS
+			EXEC tSQLt.SpyProcedure 'DeleteEmptyGenres';
+			EXEC tSQLt.SpyProcedure 'UpdateArtistRankings';
+			EXEC tSQLt.SpyProcedure 'IncreasePrices';
+			EXEC tSQLt.SpyProcedure 'UpdateMissingPostcodes';
+			
+			
+			EXEC DoAllTheThings 'Monday';
+			
+			
+			DECLARE @executionCountDeleteEmptyGenres int = 
+			(select COUNT(*) from DeleteEmptyGenres_SpyProcedureLog);
+			
+			DECLARE @executionCountUpdateArtistRankings int = 
+			(select COUNT(*) from UpdateArtistRankings_SpyProcedureLog);
+			
+			DECLARE @executionCountIncreasePrices int = 
+			(select COUNT(*) from IncreasePrices_SpyProcedureLog);
+			
+			DECLARE @executionCountUpdateMissingPostcodes int = 
+			(select COUNT(*) from UpdateMissingPostcodes_SpyProcedureLog);
+			
+			<mark>DECLARE @totalExecutionCount int = @executionCountDeleteEmptyGenres + @executionCountUpdateArtistRankings + 
+				@executionCountIncreasePrices + @executionCountUpdateMissingPostcodes 
+			
+			EXEC tSQLt.AssertEquals 2, @totalExecutionCount;</mark>
+				</code></pre>
+					</section>	
 			<section>
 				<h3>Wrapping the things we can't Mock</h3>
 				<pre><code class="tsql">EXEC xp_logevent 50234, 'I''m a pointless log message'
