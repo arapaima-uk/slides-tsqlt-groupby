@@ -762,6 +762,7 @@ END
 
 
 			<section>
+				<h3>Running the test</h3>
 				<pre><code class="tsql">EXEC tSQLt.RunAll;</code></pre>
 				<pre class="fragment"><code class="nohighlight stretch" data-trim >
 +----------------------+
@@ -2294,6 +2295,7 @@ DECLARE @executionCountUpdateMissingPostcodes int =
 
 <mark>DECLARE @totalExecutionCount int = @executionCountDeleteEmptyGenres + @executionCountUpdateArtistRankings + 
 	@executionCountIncreasePrices + @executionCountUpdateMissingPostcodes 
+
 EXEC tSQLt.AssertEquals 2, @totalExecutionCount;</mark>
 	</code></pre>
 		</section>					
@@ -2380,6 +2382,157 @@ EXEC tSQLt.AssertEquals 0, @executionCount;
 				<h3>If you have difficulty saying what the test condition is, you're going to have difficulty maintaining it</h3>
 			</section>
 
+			<section>
+                    <h4>Expecting the worst</h4>
+                    <pre class="stretch"><code class="tsql" data-trim data-noescape>
+CREATE PROCEDURE AddNewAlbum @ArtistName nvarchar(120), @AlbumName nvarchar(160)
+AS
+
+DECLARE @ArtistID int;
+
+SELECT @ArtistID = ArtistId FROM Artist WHERE Name = @ArtistName;
+
+IF (@ArtistID IS NULL)
+BEGIN
+	Exec LogError @message = 'The artist name does not exist';
+	THROW 54321, 'The artist name does not exist', 1;
+END
+ELSE
+BEGIN
+INSERT INTO Album (Title, ArtistID) VALUES (@AlbumName, @ArtistID);
+END   
+    </code></pre>
+                </section>
+<section>
+                    <h4>Expecting Exceptions</h4>
+                    <pre class="stretch"><code class="tsql" data-trim data-noescape>
+CREATE PROCEDURE AddNewAlbum.[Test missing artist throws exception and writes log]
+AS
+EXEC tSQLT.FakeTable 'Artist';
+EXEC tSQLt.FakeTable 'Album';
+EXEC tSQLt.SpyProcedure 'LogError'
+
+EXEC tsqlt.ExpectException;
+EXEC AddNewAlbum 'Showaddywaddy', 'Trocadero';
+
+SELECT 'The artist name does not exist' as message into Expected;
+SELECT message into Actual from LogError_SpyProcedureLog ;
+
+EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual'; 
+    </code></pre>
+                    <h5>This test passes</h5>
+                </section>
+<section>
+                    <h4>Expecting Exceptions</h4>
+                    <pre class="stretch"><code class="tsql" data-trim data-noescape >
+CREATE PROCEDURE AddNewAlbum.[Test missing artist throws exception and writes log]
+AS
+EXEC tSQLT.FakeTable 'Artist';
+EXEC tSQLt.FakeTable 'Album';
+EXEC tSQLt.SpyProcedure 'LogError'
+
+EXEC tsqlt.ExpectException;
+EXEC AddNewAlbum 'Showaddywaddy', 'Trocadero';
+
+SELECT <mark>'Who put the bomp In the bomp bah bomp bah bomp?'</mark> as message into Expected;
+SELECT message into Actual from LogError_SpyProcedureLog ;
+
+EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual'; 
+    </code></pre>
+                    <h5>But so does this one!</h5>
+</section>
+
+<section>
+		<h4>Expecting Exceptions</h4>
+		<pre class="stretch"><code class="tsql" data-trim data-noescape >
+CREATE PROCEDURE AddNewAlbum.[Test missing artist throws exception and writes log]
+AS
+EXEC tSQLT.FakeTable 'Artist';
+EXEC tSQLt.FakeTable 'Album';
+EXEC tSQLt.SpyProcedure 'LogError'
+
+<mark>EXEC tsqlt.ExpectException;</mark>
+EXEC AddNewAlbum 'Showaddywaddy', 'Trocadero';
+
+SELECT 'Who put the bomp In the bomp bah bomp bah bomp?' as message into Expected;
+SELECT message into Actual from LogError_SpyProcedureLog ;
+
+EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual'; 
+</code></pre>
+		<h5>But so does this one!</h5>
+</section>
+<section>
+		<h4>Expecting Exceptions</h4>
+		<pre class="stretch"><code class="tsql" data-trim data-noescape >
+CREATE PROCEDURE AddNewAlbum.[Test missing artist throws exception and writes log]
+AS
+EXEC tSQLT.FakeTable 'Artist';
+EXEC tSQLt.FakeTable 'Album';
+EXEC tSQLt.SpyProcedure 'LogError'
+
+EXEC tsqlt.ExpectException;
+<mark>EXEC AddNewAlbum 'Showaddywaddy', 'Trocadero';</mark>
+
+SELECT 'Who put the bomp In the bomp bah bomp bah bomp?' as message into Expected;
+SELECT message into Actual from LogError_SpyProcedureLog ;
+
+EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual'; 
+</code></pre>
+		<h5>But so does this one!</h5>
+</section>
+               <section>
+					<h4>Expecting Exceptions</h4>
+					<pre class="stretch"><code class="tsql" data-trim data-noescape >
+CREATE PROCEDURE AddNewAlbum.[Test missing artist throws exception <mark>and</mark> writes log]
+AS
+EXEC tSQLT.FakeTable 'Artist';
+EXEC tSQLt.FakeTable 'Album';
+EXEC tSQLt.SpyProcedure 'LogError'
+
+EXEC tsqlt.ExpectException
+EXEC AddNewAlbum 'Showaddywaddy', 'Trocadero';
+
+SELECT 'Who put the bomp In the bomp bah bomp bah bomp?' as message into Expected;
+SELECT message into Actual from LogError_SpyProcedureLog ;
+
+EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual'; 
+	</code></pre>
+					<h5>But so does this one!</h5>
+				</section>				
+                <section>
+                    <h4>Expecting Exceptions</h4>
+                    <pre class="stretch"><code class="tsql" data-trim data-noescape>
+CREATE AddNewAlbum.[Test missing artist writes log record]
+AS
+EXEC tSQLT.FakeTable 'Artist';
+EXEC tSQLt.FakeTable 'Album';
+EXEC tSQLt.SpyProcedure 'LogError'
+
+BEGIN TRY
+	EXEC AddNewAlbum 'Showaddywaddy', 'Trocadero';
+END TRY
+BEGIN CATCH
+END CATCH
+SELECT 'The artist name does not exist' as message into Expected;
+SELECT message into Actual from LogError_SpyProcedureLog ;
+
+EXEC tSQLt.AssertEqualsTable 'Expected', 'Actual';
+GO
+
+/*********************************************************/
+CREATE PROCEDURE AddNewAlbum.[Test missing artist throws exception]
+AS
+EXEC tSQLT.FakeTable 'Artist';
+EXEC tSQLt.FakeTable 'Album';
+EXEC tSQLt.SpyProcedure 'LogError'
+
+EXEC tsqlt.ExpectException;
+EXEC AddNewAlbum 'Showaddywaddy', 'Trocadero';
+    </code></pre>
+                    <h5>Create a separate test for the logging</h5>
+                </section>
+
+
 		</div>
 	</div>
 
@@ -2395,6 +2548,8 @@ EXEC tSQLt.AssertEquals 0, @executionCount;
 			width: 1920,
 			height: 1080,
 			slideNumber: 'c/t',
+			showSlideNumber: 'speaker',
+			controls: false,
 			dependencies: [
 				{ src: 'plugin/markdown/marked.js' },
 				{ src: 'plugin/markdown/markdown.js' },
