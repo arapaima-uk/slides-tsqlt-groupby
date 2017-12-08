@@ -61,7 +61,7 @@
 
 			</section>
 
-			<section>
+<!-- 			<section>
 				<h2>What code should we test?</h2>
 				<blockquote class="fragment" data-fragment-index="1">
 					It's called unit testing because you break down the functionality of your program into discrete testable
@@ -117,10 +117,10 @@
 						</tr>
 					</tbody>
 				</table>
-			</section>
+			</section> -->
 
 
-			<!-- 			<section>
+						<section>
 				<h2>What makes a "good" Unit Test</h2>
 				<ul>
 					<li>Fast</li>
@@ -128,7 +128,7 @@
 					<li>Reliable</li>
 					<li>Specific</li>
 				</ul>
-			</section> -->
+			</section>
 
 			<section>
 				<h2>The Test Pyramid</h2>
@@ -395,10 +395,53 @@ SELECT * FROM Album WHERE AlbumId = 348;
 					</li>
 				</span>
 			</section>
+			<section>
+					<h3>Installation</h3>
+					<pre><code class="tsql stretch" data-trim>
+						/*
+						Copyright 2011 tSQLt
+					 
+						Licensed under the Apache License, Version 2.0 (the "License");
+						you may not use this file except in compliance with the License.
+						You may obtain a copy of the License at
+					 
+							http://www.apache.org/licenses/LICENSE-2.0
+					 
+						Unless required by applicable law or agreed to in writing, software
+						distributed under the License is distributed on an "AS IS" BASIS,
+						WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+						See the License for the specific language governing permissions and
+						limitations under the License.
+					 */
+					 DECLARE @Msg NVARCHAR(MAX);SELECT @Msg = 'Installed at '+CONVERT(NVARCHAR,GETDATE(),121);RAISERROR(@Msg,0,1);
+					 GO
+					 
+					 IF TYPE_ID('tSQLt.Private') IS NOT NULL DROP TYPE tSQLt.Private;
+					 IF TYPE_ID('tSQLtPrivate') IS NOT NULL DROP TYPE tSQLtPrivate;
+					 GO
+					 IF OBJECT_ID('tSQLt.DropClass') IS NOT NULL
+						 EXEC tSQLt.DropClass tSQLt;
+					 GO
+					 
+					 IF EXISTS (SELECT 1 FROM sys.assemblies WHERE name = 'tSQLtCLR')
+						 DROP ASSEMBLY tSQLtCLR;
+					 GO
+					 
+					 CREATE SCHEMA tSQLt;
+					 GO
+					 SET QUOTED_IDENTIFIER ON;
+					 GO
+					 
+					  
+					 ...
+					 ...
+				</code></pre>
+				
+				</section>			
 
 			<section>
 				<h3>Installation</h3>
-				<pre><code class="tsql stretch" data-trim>
+				<pre><code class="tsql" data-trim>
 					/*
 					Copyright 2011 tSQLt
 				 
@@ -436,6 +479,19 @@ SELECT * FROM Album WHERE AlbumId = 348;
 				  
 				 ...
 				 ...
+			</code></pre>
+			<pre ><code class="nohighlight" data-trim >
+					Installed at 2017-11-03 07:40:03.010
+					
+				   +-----------------------------------------+
+				   |                                         |
+				   | Thank you for using tSQLt.              |
+				   |                                         |
+				   | tSQLt Version: 1.0.5873.27393           |
+				   |                                         |
+				   +-----------------------------------------+
+				   
+				
 			</code></pre>
 			</section>
 			<section>
@@ -2382,6 +2438,54 @@ EXEC tSQLt.AssertEquals 0, @executionCount;
 				<h3>If you have difficulty saying what the test condition is, you're going to have difficulty maintaining it</h3>
 			</section>
 
+<section>
+		<h4>Expecting the worst</h4>
+		<pre class="fragment"><code class="tsql" data-trim data-noescape>
+				CREATE PROCEDURE AddLineToExistingInvoice @InvoiceId INT, @TrackId INT, @UnitPrice numeric(10, 2), @Quantity int
+				AS
+				BEGIN
+				INSERT INTO dbo.InvoiceLine(InvoiceId, TrackId, UnitPrice, Quantity)
+				VALUES
+				(@InvoiceId, @TrackId, @UnitPrice, @Quantity);
+				END
+				GO	
+
+
+		</code></pre>
+
+		<pre class="fragment"><code class="tsql" data-trim data-noescape>
+				CREATE PROCEDURE AddLineToExistingInvoice.[test non-existent invoice throws exception]
+				AS
+				
+				EXEC tSQLt.FakeTable 'dbo.Invoice';
+				EXEC tSQLt.FakeTable 'dbo.InvoiceLine';
+				EXEC tSQLt.ApplyConstraint 'dbo.InvoiceLine', 'FK_InvoiceLineInvoiceId';
+				
+				EXEC tSQLt.ExpectException;
+				
+				EXEC AddLineToExistingInvoice @InvoiceID = 123, @TrackId = 345, @UnitPrice = 99.99, @Quantity = 2
+				
+				GO
+
+
+		</code></pre>
+		<pre class="fragment"><code class="nohighlight" data-trim data-noescape>
+				+----------------------+
+				|Test Execution Summary|
+				+----------------------+
+				 
+				|No|Test Case Name                                                         |Dur(ms)|Result |
+				+--+-----------------------------------------------------------------------+-------+-------+
+				|1 |[AddLineToExistingInvoice].[test non-existent invoice throws exception]|   1217|Success|
+				-----------------------------------------------------------------------------
+				Test Case Summary: 1 test case(s) executed, 1 succeeded, 0 failed, 0 errored.
+				-----------------------------------------------------------------------------
+				
+
+		</code></pre>
+	
+</section>		
+
 			<section>
                     <h4>Expecting the worst</h4>
                     <pre class="stretch"><code class="tsql" data-trim data-noescape>
@@ -2530,7 +2634,29 @@ EXEC tsqlt.ExpectException;
 EXEC AddNewAlbum 'Showaddywaddy', 'Trocadero';
     </code></pre>
                     <h5>Create a separate test for the logging</h5>
-                </section>
+				</section>
+				<section>
+						<h3>Treat Exceptions as separate tests</h3>
+						<hr/>
+						<h3>You don't need to test that SQL Server is working</h3>
+					</section>
+					
+					<section><h1>Summary</h1>
+					<h4 class="fragment">Arrange - Act - Assert</h4>
+					<h4 class="fragment">Mock dependencies to isolate the code under test</h4>
+					<h4 class="fragment">Only test the code <em>you</em> own</h4>
+					<h4 class="fragment">Change the Code, not the Test, to generate a failure</h4>
+					<h4 class="fragment">Observe test naming conventions</h4>
+					<h4 class="fragment">Use data builders rather than setup procs</h4>
+					<h4 class="fragment">Modular code is easier to test</h4>
+					<h4 class="fragment">Inject dependencies where possible</h4>
+					<h4 class="fragment">Be careful with exceptions</h4>					
+					</section>
+
+					<section>
+						<h1>Thanks for listening</h1>
+
+					</section>
 
 
 		</div>
